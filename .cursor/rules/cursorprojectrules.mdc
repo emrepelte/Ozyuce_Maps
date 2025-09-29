@@ -1,0 +1,145 @@
+---
+description: OzyuceMaps Android uygulaması için tekil kurallar. Kotlin + Jetpack Compose + Clean Architecture (Hilt/Room/Navigation). Aşağıdaki mimari ve uç noktalarla uyumlu üretim yap.
+globs:
+  - "app/src/**/*.kt"
+  - "app/src/**/*.kts"
+  - "**/*.gradle.kts"
+  - "**/AndroidManifest.xml"
+  - "core/**"
+  - "feature/**"
+  - "build.gradle.kts"
+  - "settings.gradle.kts"
+alwaysApply: true
+---
+
+# OzyuceMaps — Android (Kotlin, Compose, Clean Architecture) Ruleset
+
+## Genel İlke
+- **UI tamamen Jetpack Compose** (XML yok).
+- **Katmanlar**: Domain (use case + entity + repo arayüzleri), Data (Retrofit/Room/Repo impl + DTO/mapper), Presentation (Compose UI + ViewModel + Navigation).
+- **MVVM + UDF**: UI state için immutable data class; akış **StateFlow**; tek yönlü veri akışı.
+- **DI**: Hilt. Application `@HiltAndroidApp`. Modüller: Network, Database, Repositories, UseCases.
+- **Persistans**: Room (yalnızca Data katmanında). Repositories domain modellerini dışarı açar, Room entity’lerini sızdırma.
+- **Navigasyon**: Navigation Compose. Rotalar **sealed class** ile merkezileştirilsin.
+- **Hata yönetimi**: `Result<T>`/sealed `Either` türleri. UI’da hatalar `UiEvent.ShowSnackbar` gibi one-shot event’lerle yayılsın.
+- **İsimlendirme**: PascalCase (sınıf/@Composable), camelCase (değişken/fonksiyon), dosya adları `lowercase_with_underscores`.
+- **Modifier sırası**: layout → behavior → drawing. Material 3 kullan.
+- **Log**: Timber. Gizli veri loglanmaz.
+- **Erişilebilirlik**: `contentDescription`, `semantics {}`.
+
+## Proje Bağlamı (Önemli)
+- Uygulama adı: **OzyuceMaps**
+- Kullanıcı tipleri: **sürücü**, **müşteri** (rol temelli ekranlar)
+- Backend BASE_URL: `https://<domain>/api` (BuildConfig üzerinden)
+- Uç Noktalar:
+  - `POST /auth/login`, `POST /auth/register`
+  - `POST /service/start`, `POST /service/end`
+  - `POST /stops/check`, `GET /stops?routeId=...`
+  - `GET /personnel?routeId=...`, `POST /personnel`
+  - `GET /reports/daily`
+  - FCM token kaydı için opsiyonel: `POST /notifications/token`
+- Dış Servisler:
+  - **Google Maps Compose** (harita, marker, polyline)
+  - **FusedLocationProvider** (sürücü konumu)
+  - **OkHttp WebSocket** (canlı konum yayını)
+  - **Google Distance Matrix API** (ETA hesaplama)
+
+## Modül / Dizin Yapısı
+- `app/` (presentation giriş)
+- `core/common/` (Result, dispatcher, DateTime utils)
+- `core/network/` (Retrofit/OkHttp, WebSocket client, interceptors)
+- `core/database/` (Room: entities/dao/db)
+- `feature/auth/`
+- `feature/service/`
+- `feature/stops/`
+- `feature/reports/`
+- `feature/map/`
+> Cursor: Yeni özellik eklerken ilgili `feature/*` modülünde ViewModel + UI + UseCase + Repo kablolarını tamamla.
+
+## Bağımlılıklar (kullan)
+- Kotlin, Coroutines, Kotlinx-Serialization veya Moshi
+- Compose BOM + Material3 + Navigation Compose
+- Hilt (dagger/hilt-android, hilt-navigation-compose)
+- Room (runtime, ktx, compiler)
+- Retrofit + OkHttp (logging, WebSocket)
+- DataStore (veya EncryptedSharedPreferences) — auth token saklama
+- Timber
+- Google Play services location + Maps Compose
+- FCM (firebase-messaging)
+
+## Navigasyon
+- `sealed class Dest(val route: String)` ile destinasyonları merkezileştir.
+- Argümanlar için tip güvenliği uygula. Route stringlerini tek yerde tut; hardcode kopyalamayı engelle.
+- Navigation yan etkilerini ViewModel içinden **one-time UI event** ile gönder.
+
+## ViewModel & State
+- ViewModel’ler Hilt ile `@HiltViewModel` ve constructor injection.
+- UI state: `data class XxxUiState(...)` (immutable).
+- One-shot: `sealed interface UiEvent { data class Navigate(...); data class ShowSnackbar(...) }`.
+- Ağ/iş kuralları ViewModel’de değil **UseCase**’lerde.
+
+## Data Katmanı
+- Retrofit interface’leri: `AuthApi`, `ServiceApi`, `StopsApi`, `PersonnelApi`, `ReportsApi`, `NotificationsApi`.
+- Room:
+  - `StopEntity(id, name, sequence, scheduledTime)`
+  - `PersonnelEntity(id, name, active, stopId)`
+  - `ServiceSessionEntity(id, routeId, startTime, endTime, driverId)`
+- Repo implementasyonları domain modellerini döndürmeli, DTO↔Domain mapper kullan.
+
+## Domain Katmanı
+- Arayüz repo’lar: `AuthRepository`, `ServiceRepository`, `StopsRepository`, `PersonnelRepository`, `ReportsRepository`, `NotificationsRepository`.
+- UseCase örnekleri:
+  - `LoginUseCase(email, password)`
+  - `RegisterUseCase(...)`
+  - `StartServiceUseCase(routeId)`
+  - `EndServiceUseCase()`
+  - `CheckStopUseCase(stopId, boarded: Boolean)`
+  - `ListPersonnelUseCase(routeId)`
+  - `AddPersonnelUseCase(name, stopId)`
+  - `ComputeEtaUseCase(origin, destination)`
+  - `GetDailyReportUseCase(date)`
+  - `RegisterFcmTokenUseCase(token)`
+
+## Özellik Gereksinimleri (senin adımlarına denk)
+1) **Auth**: email/şifre; JWT token’ı DataStore’da sakla. Başarılı login → `Dest.Dashboard`.
+2) **Servis Başlat/Bitir**: Büyük butonlu UI. Başlangıç/bitiş zamanını kaydet ve UI’da durum göster.
+3) **Durak Kontrol & Personel**: Liste + yeşil Check / kırmızı X. “+ Yeni Personel” diyalogu.
+4) **Canlı Konum**: Sürücü konumunu periyodik gönder (WebSocket). Harita ekranında araç marker’ı + rota polyline. ETA hesapla ve rozet olarak göster.
+5) **Raporlama**: `/reports/daily` → katılım pie ve günlük süreler bar. Compose canvas ile basit grafik veya interop.
+6) **Bildirim**: FCM topic/token; rota sapma/durak atlama/gecikme bildirimlerini dinle. Android 13+ izin akışı.
+7) **Test**: Domain (JUnit/Turbine), Data (MockWebServer, Room in-memory), Presentation (compose-ui-test). Temel senaryolar: servis başlat/bitir, durak kontrolü, konum yayını, rapor çekme.
+
+## Hilt Modülleri
+- `NetworkModule`: OkHttp (logging), Retrofit (BASE_URL = BuildConfig.BASE_URL), auth header interceptor.
+- `DatabaseModule`: Room DB + DAO provider’lar.
+- `RepositoryModule`: interface→impl binding’leri.
+- `UseCaseModule`: use case `@Provides` veya “grup” data class ile topla.
+
+## Güvenlik & İzinler
+- Manifest: `ACCESS_COARSE/FINE_LOCATION`, gerekiyorsa `ACCESS_BACKGROUND_LOCATION`, `POST_NOTIFICATIONS`.
+- Sadece gerekli scope’ta izin iste.
+- Token/kişisel veri loglama **yasak**.
+
+## Kod Kalitesi
+- Küçük, yeniden kullanılabilir `@Composable`’lar.
+- Preview’lar (`@Preview`) görsel; iş mantığı barındırmaz.
+- Dosya & paket düzeni katman mantığına uyar.
+- PR’larda mimari ihlali varsa düzeltme öner.
+
+## Çıktı Beklentileri (Cursor için net yönergeler)
+- Yeni özellikte **önce** domain arayüz & use case → data repo impl → Hilt modülleri → ViewModel → Compose UI sırasını uygula.
+- Her ViewModel’de: `StateFlow<UiState>` + `SharedFlow<UiEvent>`.
+- Her API çağrısında: loading/error durumlarını UI state’e yansıt; kullanıcı geri bildirimi için `UiEvent.ShowSnackbar`.
+- Navigasyon sadece UiEvent/VM üzerinden tetiklenir; Composable içinde doğrudan `navController.navigate` çağrısı **yapma** (VM’den gelen event’i handle et).
+
+## Yasaklar
+- XML layout, rastgele hardcoded route string, global mutable singleton, Activity içi iş kuralı, Room entity’lerini UI’ya sızdırma, `println()/Log.*`, gizli veri loglama.
+
+## Örnek İskelet (oluşturulacak)
+- `Dest` sealed class rotalar
+- `ServiceViewModel` (Start/End use case entegrasyonlu)
+- `StopsViewModel` (check/add personnel)
+- `MapScreen` (Google Maps Compose ile marker, ETA rozeti)
+- `ReportsViewModel` + `ReportsScreen` (pie/bar)
+- `NetworkModule`, `DatabaseModule`, `RepositoryModule`, `UseCaseModule`
+- Room `AppDatabase` + `StopsDao`, `PersonnelDao`, `ServiceSessionDao`

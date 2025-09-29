@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- OzyuceMaps Ana Renkleri -->
+    <color name="ozyuce_blue">#FF1976D2</color>
+    <color name="ozyuce_light_blue">#FF63A4FF</color>
+    <color name="ozyuce_dark_blue">#FF004BA0</color>
+    
+    <color name="ozyuce_orange">#FFFF9800</color>
+    <color name="ozyuce_light_orange">#FFFFCC02</color>
+    <color name="ozyuce_dark_orange">#FFC66900</color>
+    
+    <!-- Durum Renkleri -->
+    <color name="success_green">#FF4CAF50</color>
+    <color name="warning_yellow">#FFFFC107</color>
+    <color name="error_red">#FFF44336</color>
+    
+    <!-- Gri Tonları -->
+    <color name="light_gray">#FFF5F5F5</color>
+    <color name="medium_gray">#FF9E9E9E</color>
+    <color name="dark_gray">#FF424242</color>
+    
+    <!-- Standart Renkler -->
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+</resources>

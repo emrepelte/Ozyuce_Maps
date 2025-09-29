@@ -1,0 +1,11 @@
+android {
+    signingConfigs {
+        release {
+            // Bu değerler local.properties'den okunmalı
+            storeFile file("../keystore/release.keystore")
+            storePassword System.getenv("KEYSTORE_PASSWORD") ?: project.properties['KEYSTORE_PASSWORD']
+            keyAlias System.getenv("KEY_ALIAS") ?: project.properties['KEY_ALIAS']
+            keyPassword System.getenv("KEY_PASSWORD") ?: project.properties['KEY_PASSWORD']
+        }
+    }
+}

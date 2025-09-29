@@ -1,0 +1,92 @@
+plugins {
+    id 'com.android.library'
+    id 'org.jetbrains.kotlin.android'
+    id 'kotlin-kapt'
+    id 'com.google.dagger.hilt.android'
+}
+
+android {
+    namespace 'com.ozyuce.maps.core.database'
+    compileSdk 36
+
+    defaultConfig {
+        minSdk 24
+        targetSdk 36
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        consumerProguardFiles "consumer-rules.pro"
+
+        // Room schema export
+        javaCompileOptions {
+            annotationProcessorOptions {
+                arguments += ["room.schemaLocation": "$projectDir/schemas".toString()]
+            }
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    kotlinOptions {
+        jvmTarget = '17'
+    }
+}
+
+dependencies {
+    // Room
+    implementation libs.room.runtime
+    implementation libs.room.ktx
+    kapt libs.room.compiler
+    
+    // Hilt
+    implementation libs.hilt.android
+    kapt libs.hilt.compiler
+
+    // Testing
+    testImplementation libs.junit
+    testImplementation libs.room.testing
+    androidTestImplementation libs.androidx.junit
+    androidTestImplementation libs.androidx.espresso.core
+}
+
+tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
+    kotlinOptions {
+        jvmTarget = "17"
+    }
+}
+
+kotlin {
+    jvmToolchain(17)
+}
+
+kapt {
+    correctErrorTypes = true
+    javacOptions {
+        option("-J-Djava.io.tmpdir=${buildDir}/room-tmp")
+        option("-J-Dorg.sqlite.tmpdir=${buildDir}/room-tmp")
+        option("-J-Dorg.sqlite.lib.path=${buildDir}/room-tmp")
+    }
+}
+
+afterEvaluate {
+    file("${buildDir}/room-tmp").mkdirs()
+}
+
+tasks.withType(org.jetbrains.kotlin.gradle.internal.KaptWithoutKotlincTask).configureEach {
+    doFirst {
+        System.setProperty("java.io.tmpdir", "${buildDir}/room-tmp")
+        System.setProperty("org.sqlite.tmpdir", "${buildDir}/room-tmp")
+        System.setProperty("org.sqlite.lib.path", "${buildDir}/room-tmp")
+    }
+}
+
+

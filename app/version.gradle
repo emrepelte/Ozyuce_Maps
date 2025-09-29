@@ -1,0 +1,26 @@
+ext {
+    // Git tag'den versiyon bilgisini al
+    getVersionNameFromGit = { ->
+        try {
+            def stdout = new ByteArrayOutputStream()
+            exec {
+                commandLine 'git', 'describe', '--tags', '--abbrev=0'
+                standardOutput = stdout
+            }
+            return stdout.toString().trim()
+        } catch (ignored) {
+            return "1.0.0" // Varsayılan versiyon
+        }
+    }
+
+    // Time-based version code
+    getVersionCode = { ->
+        def today = new Date()
+        def year = today.format('yy').toInteger()
+        def month = (today.format('MM').toInteger())
+        def day = today.format('dd').toInteger()
+        
+        // YYMMDDNN formatı (NN: günlük build numarası)
+        return year * 1000000 + month * 10000 + day * 100 + (System.getenv("BUILD_NUMBER")?.toInteger() ?: 1)
+    }
+}

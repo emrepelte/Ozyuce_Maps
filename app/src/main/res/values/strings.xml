@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">OzyuceMaps</string>
+    
+    <!-- Splash Screen -->
+    <string name="splash_title">OzyuceMaps</string>
+    <string name="splash_subtitle">Akıllı Ulaşım Çözümleri</string>
+    
+    <!-- Genel -->
+    <string name="loading">Yükleniyor…</string>
+    <string name="error">Hata</string>
+    <string name="success">Başarılı</string>
+    <string name="retry">Tekrar Dene</string>
+    <string name="cancel">İptal</string>
+    <string name="ok">Tamam</string>
+    <string name="save">Kaydet</string>
+    <string name="delete">Sil</string>
+    <string name="undo">Geri Al</string>
+    <string name="search">Ara</string>
+    <string name="no_data">Veri bulunamadı</string>
+    <string name="try_again">Tekrar deneyin</string>
+    
+    <!-- Navigasyon -->
+    <string name="nav_dashboard">Ana Sayfa</string>
+    <string name="nav_stops">Duraklar</string>
+    <string name="nav_map">Harita</string>
+    <string name="nav_reports">Raporlar</string>
+    <string name="nav_profile">Profil</string>
+    
+    <!-- Dashboard -->
+    <string name="service_start">Servisi Başlat</string>
+    <string name="service_stop">Servisi Bitir</string>
+    <string name="service_active">Servis Aktif</string>
+    <string name="service_inactive">Servis Beklemede</string>
+    <string name="service_error">Servis başlatılamadı. İnternet bağlantınızı kontrol edip tekrar deneyin.</string>
+    
+    <!-- Duraklar -->
+    <string name="stops_search_hint">Durak veya personel ara…</string>
+    <string name="stops_empty">Henüz durak bulunmuyor</string>
+    <string name="stops_error">Duraklar yüklenemedi. Tekrar denemek için yenileyin.</string>
+    <string name="person_status_updated">%1$s durumu güncellendi</string>
+    <string name="person_status_boarded">Bindi</string>
+    <string name="person_status_absent">Gelmedi</string>
+    <string name="person_add">Yeni Personel Ekle</string>
+    <string name="person_name">Personel Adı</string>
+    <string name="person_stop">Durak Seçin</string>
+    
+    <!-- Harita -->
+    <string name="map_next_stop">Sonraki Durak</string>
+    <string name="map_eta">Tahmini Varış: %1$s</string>
+    <string name="map_route_details">Rota Detayları</string>
+    <string name="map_error_location">Konum alınamadı. GPS\'i açıp tekrar deneyin.</string>
+    <string name="map_error_route">Rota yüklenemedi. İnternet bağlantınızı kontrol edip tekrar deneyin.</string>
+    
+    <!-- Raporlar -->
+    <string name="reports_daily">Günlük</string>
+    <string name="reports_weekly">Haftalık</string>
+    <string name="reports_monthly">Aylık</string>
+    <string name="reports_attendance">Katılım Oranı</string>
+    <string name="reports_duration">Ortalama Süre</string>
+    <string name="reports_empty">Bu tarih aralığında veri bulunamadı</string>
+    <string name="reports_error">Raporlar yüklenemedi. Tekrar denemek için yenileyin.</string>
+    
+    <!-- Hata Mesajları -->
+    <string name="error_network">İnternet bağlantısı bulunamadı. Bağlantınızı kontrol edip tekrar deneyin.</string>
+    <string name="error_server">Sunucu hatası. Lütfen daha sonra tekrar deneyin.</string>
+    <string name="error_unknown">Beklenmeyen bir hata oluştu. Tekrar deneyin.</string>
+    <string name="error_location_permission">Konum izni gerekli. Ayarlardan konum iznini verip tekrar deneyin.</string>
+    <string name="error_notification_permission">Bildirim izni gerekli. Ayarlardan bildirim iznini verip tekrar deneyin.</string>
+</resources>

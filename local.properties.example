@@ -1,0 +1,12 @@
+# API Keys
+MAPS_API_KEY=your_google_maps_api_key_here
+
+# Release Signing
+KEYSTORE_PASSWORD=your_keystore_password
+KEY_ALIAS=your_key_alias
+KEY_PASSWORD=your_key_password
+
+# Build Settings
+org.gradle.jvmargs=-Xmx2048m -Dfile.encoding=UTF-8
+android.useAndroidX=true
+android.enableJetifier=false
