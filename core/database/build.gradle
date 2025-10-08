@@ -1,7 +1,7 @@
 plugins {
     id 'com.android.library'
     id 'org.jetbrains.kotlin.android'
-    id 'kotlin-kapt'
+    alias(libs.plugins.ksp)
     id 'com.google.dagger.hilt.android'
 }
 
@@ -45,11 +45,11 @@ dependencies {
     // Room
     implementation libs.room.runtime
     implementation libs.room.ktx
-    kapt libs.room.compiler
-    
+    ksp libs.room.compiler
+
     // Hilt
     implementation libs.hilt.android
-    kapt libs.hilt.compiler
+    ksp libs.hilt.compiler
 
     // Testing
     testImplementation libs.junit
@@ -67,26 +67,4 @@ tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
 kotlin {
     jvmToolchain(17)
 }
-
-kapt {
-    correctErrorTypes = true
-    javacOptions {
-        option("-J-Djava.io.tmpdir=${buildDir}/room-tmp")
-        option("-J-Dorg.sqlite.tmpdir=${buildDir}/room-tmp")
-        option("-J-Dorg.sqlite.lib.path=${buildDir}/room-tmp")
-    }
-}
-
-afterEvaluate {
-    file("${buildDir}/room-tmp").mkdirs()
-}
-
-tasks.withType(org.jetbrains.kotlin.gradle.internal.KaptWithoutKotlincTask).configureEach {
-    doFirst {
-        System.setProperty("java.io.tmpdir", "${buildDir}/room-tmp")
-        System.setProperty("org.sqlite.tmpdir", "${buildDir}/room-tmp")
-        System.setProperty("org.sqlite.lib.path", "${buildDir}/room-tmp")
-    }
-}
-
 

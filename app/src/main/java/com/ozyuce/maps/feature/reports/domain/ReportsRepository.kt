@@ -17,6 +17,7 @@ interface ReportsRepository {
     suspend fun getAttendanceChartData(filter: ReportFilter): Result<ChartData>
     suspend fun getPerformanceChartData(filter: ReportFilter): Result<ChartData>
     suspend fun getTimeAnalysisChartData(filter: ReportFilter): Result<ChartData>
+    suspend fun getLateCount(filter: ReportFilter): Result<Int>
     suspend fun exportReportToPdf(report: DailyReport): Result<String> // File path
 }
 

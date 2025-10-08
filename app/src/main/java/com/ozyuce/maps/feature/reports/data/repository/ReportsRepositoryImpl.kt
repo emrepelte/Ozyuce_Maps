@@ -99,12 +99,40 @@ class ReportsRepositoryImpl @Inject constructor() : ReportsRepository {
         }
     }
 
-    override suspend fun getTimeAnalysisChartData(filter: ReportFilter): Result<ChartData> {\n        return try {\n            kotlinx.coroutines.delay(450) // Network simulation\n            \n            val timeChart = ChartData(\n                type = ChartType.LINE_CHART,\n                title = "Haftalık Zaman Analizi",\n                data = listOf(\n                    ChartEntry("Pazartesi", 42f, description = "42 dakika"),\n                    ChartEntry("Salı", 38f, description = "38 dakika"),\n                    ChartEntry("Çarşamba", 45f, description = "45 dakika"),\n                    ChartEntry("Perşembe", 40f, description = "40 dakika"),\n                    ChartEntry("Cuma", 43f, description = "43 dakika"),\n                    ChartEntry("Cumartesi", 35f, description = "35 dakika"),\n                    ChartEntry("Pazar", 30f, description = "30 dakika")\n                )\n            )\n            \n            Result.Success(timeChart)\n        } catch (e: Exception) {\n            Result.Error(e)\n        }\n    } catch (e: Exception) {
+    override suspend fun getTimeAnalysisChartData(filter: ReportFilter): Result<ChartData> {
+        return try {
+            kotlinx.coroutines.delay(450) // Network simulation
+
+            val timeChart = ChartData(
+                type = ChartType.LINE_CHART,
+                title = "Haftalık Zaman Analizi",
+                data = listOf(
+                    ChartEntry("Pazartesi", 42f, description = "42 dakika"),
+                    ChartEntry("Salı", 38f, description = "38 dakika"),
+                    ChartEntry("Çarşamba", 45f, description = "45 dakika"),
+                    ChartEntry("Perşembe", 40f, description = "40 dakika"),
+                    ChartEntry("Cuma", 43f, description = "43 dakika"),
+                    ChartEntry("Cumartesi", 35f, description = "35 dakika"),
+                    ChartEntry("Pazar", 30f, description = "30 dakika")
+                )
+            )
+
+            Result.Success(timeChart)
+        } catch (e: Exception) {
             Result.Error(e)
         }
     }
 
-    override suspend fun getLateCount(filter: ReportFilter): Result<Int> {\n        return try {\n            kotlinx.coroutines.delay(200)\n            Result.Success(Random.nextInt(0, 50))\n        } catch (e: Exception) {\n            Result.Error(e)\n        }\n    }\n\n    override suspend fun exportReportToPdf(report: DailyReport): Result<String> {
+    override suspend fun getLateCount(filter: ReportFilter): Result<Int> {
+        return try {
+            kotlinx.coroutines.delay(200)
+            Result.Success(Random.nextInt(0, 50))
+        } catch (e: Exception) {
+            Result.Error(e)
+        }
+    }
+
+    override suspend fun exportReportToPdf(report: DailyReport): Result<String> {
         return try {
             kotlinx.coroutines.delay(2000) // File generation simulation
             

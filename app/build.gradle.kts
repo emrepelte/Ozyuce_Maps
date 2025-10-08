@@ -225,9 +225,28 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.test.manifest)
 }
 
+// BU KODU EKLEYİN
+val sqliteTmpDir = file("$buildDir/tmp/roomSqlite")
+
+kapt {
+    // Derleme başlamadan önce bu klasörün var olduğundan emin ol
+    sqliteTmpDir.mkdirs()
+
+    // Kapt işlemi için Java derleyici seçeneklerini ayarla
+    javacOptions {
+        // SQLite'a geçici klasörün yerini -D parametresi ile bildir
+        option("-J-Dorg.sqlite.tmpdir=${sqliteTmpDir.absolutePath}")
+        option("-J-Djava.io.tmpdir=${sqliteTmpDir.absolutePath}")
+    }
+}
+// EKLEME İŞLEMİ BURADA BİTİYOR
+
 kotlin {
     jvmToolchain(17)
     compilerOptions {
         jvmTarget.set(JvmTarget.JVM_17)
     }
 }
+
+
+
