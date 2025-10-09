@@ -11,6 +11,7 @@ import android.view.ViewGroup
 import android.widget.FrameLayout
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.core.content.FileProvider
 import androidx.core.view.drawToBitmap
 import java.io.File
@@ -23,17 +24,23 @@ fun renderComposableToView(
     heightPx: Int,
     content: @Composable () -> Unit
 ): View {
+    val root = FrameLayout(context)
+
     val composeView = ComposeView(context).apply {
         layoutParams = FrameLayout.LayoutParams(widthPx, heightPx)
+        setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnDetachedFromWindow)
         setContent(content)
-        // Offscreen ölçüm
-        measure(
-            View.MeasureSpec.makeMeasureSpec(widthPx, View.MeasureSpec.EXACTLY),
-            View.MeasureSpec.makeMeasureSpec(heightPx, View.MeasureSpec.EXACTLY)
-        )
-        layout(0, 0, measuredWidth, measuredHeight)
     }
-    return composeView
+
+    root.addView(composeView)
+
+    val widthSpec = View.MeasureSpec.makeMeasureSpec(widthPx, View.MeasureSpec.EXACTLY)
+    val heightSpec = View.MeasureSpec.makeMeasureSpec(heightPx, View.MeasureSpec.EXACTLY)
+
+    root.measure(widthSpec, heightSpec)
+    root.layout(0, 0, widthPx, heightPx)
+
+    return root
 }
 
 fun exportViewAsPng(view: View, fileName: String = "report_${'$'}{System.currentTimeMillis()}"): File {
