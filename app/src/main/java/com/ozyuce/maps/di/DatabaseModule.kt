@@ -10,6 +10,7 @@ import com.ozyuce.maps.core.database.OzyuceDatabase
 import com.ozyuce.maps.core.database.dao.AttendanceDao
 import com.ozyuce.maps.core.database.dao.PersonDao
 import com.ozyuce.maps.core.database.dao.ServiceDao
+import com.ozyuce.maps.core.database.dao.ServiceSessionDao
 import com.ozyuce.maps.core.database.dao.StopDao
 import dagger.Module
 import dagger.Provides
@@ -48,6 +49,9 @@ object DatabaseModule {
 
     @Provides
     fun provideAttendanceDao(database: OzyuceDatabase): AttendanceDao = database.attendanceDao()
+
+    @Provides
+    fun provideServiceSessionDao(database: OzyuceDatabase): ServiceSessionDao = database.serviceSessionDao()
 
     @Provides
     @Singleton

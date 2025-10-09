@@ -11,7 +11,7 @@ import com.ozyuce.maps.MainScreen
 import com.ozyuce.maps.core.designsystem.theme.OzyuceTheme
 import com.ozyuce.maps.feature.auth.ui.LoginScreen
 import com.ozyuce.maps.feature.map.presentation.MapScreen
-import com.ozyuce.maps.feature.reports.presentation.ReportsScreen
+import com.ozyuce.maps.feature.reports.ReportsScreen
 import com.ozyuce.maps.feature.service.ui.ServiceScreen
 import com.ozyuce.maps.feature.stops.ui.StopsScreen
 import com.ozyuce.maps.feature.splash.SplashScreen
@@ -54,7 +54,9 @@ fun AppNavGraph(navController: NavHostController) {
             MapScreen(navController = navController, snackbarHostState = snackbarHostState)
         }
         composable(Dest.Reports.route) {
-            ReportsScreen(navController = navController)
+            ReportsScreen(
+                onProfileClick = { /* Profil drawer AppNavGraph'ta yok, MainScreen'de var */ }
+            )
         }
         composable(Dest.Profile.route) {
             Text("Profile (TODO)")

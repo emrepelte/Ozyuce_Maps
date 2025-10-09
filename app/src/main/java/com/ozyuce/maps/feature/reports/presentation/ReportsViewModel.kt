@@ -2,7 +2,7 @@ package com.ozyuce.maps.feature.reports.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.ozyuce.maps.core.common.result.Result
+import com.ozyuce.maps.core.common.result.OzyuceResult
 import com.ozyuce.maps.feature.reports.domain.GetDailyReportUseCase
 import com.ozyuce.maps.feature.reports.domain.GetWeeklyReportUseCase
 import com.ozyuce.maps.feature.reports.domain.GetReportChartsUseCase
@@ -94,20 +94,20 @@ class ReportsViewModel @Inject constructor(
             _uiState.value = _uiState.value.copy(isLoading = true)
             
             when (val result = getDailyReportUseCase(date, routeId)) {
-                is Result.Success -> {
+                is OzyuceResult.Success -> {
                     _uiState.value = _uiState.value.copy(
                         isLoading = false,
                         dailyReport = result.data,
                         selectedDate = date
                     )
                 }
-                is Result.Error -> {
+                is OzyuceResult.Error -> {
                     _uiState.value = _uiState.value.copy(
                         isLoading = false,
                         error = "G?nl?k rapor y?klenemedi: ${result.exception.message}"
                     )
                 }
-                is Result.Loading -> {
+                is OzyuceResult.Loading -> {
                     _uiState.value = _uiState.value.copy(isLoading = true)
                 }
             }
@@ -119,19 +119,19 @@ class ReportsViewModel @Inject constructor(
             _uiState.value = _uiState.value.copy(isLoading = true)
             
             when (val result = getWeeklyReportUseCase(weekStartDate, routeId)) {
-                is Result.Success -> {
+                is OzyuceResult.Success -> {
                     _uiState.value = _uiState.value.copy(
                         isLoading = false,
                         weeklyReport = result.data
                     )
                 }
-                is Result.Error -> {
+                is OzyuceResult.Error -> {
                     _uiState.value = _uiState.value.copy(
                         isLoading = false,
                         error = "Haftal?k rapor y?klenemedi: ${result.exception.message}"
                     )
                 }
-                is Result.Loading -> {
+                is OzyuceResult.Loading -> {
                     _uiState.value = _uiState.value.copy(isLoading = true)
                 }
             }
@@ -149,35 +149,35 @@ class ReportsViewModel @Inject constructor(
         viewModelScope.launch {
             // Load attendance chart
             when (val result = getReportChartsUseCase.getAttendanceChart(filter)) {
-                is Result.Success -> {
+                is OzyuceResult.Success -> {
                     _uiState.value = _uiState.value.copy(attendanceChart = result.data)
                 }
-                is Result.Error -> {
+                is OzyuceResult.Error -> {
                     _uiEvent.emit(UiEvent.ShowSnackbar("Kat?l?m grafi?i y?klenemedi", isError = true))
                 }
-                is Result.Loading -> { /* Handled by main loading */ }
+                is OzyuceResult.Loading -> { /* Handled by main loading */ }
             }
             
             // Load performance chart
             when (val result = getReportChartsUseCase.getPerformanceChart(filter)) {
-                is Result.Success -> {
+                is OzyuceResult.Success -> {
                     _uiState.value = _uiState.value.copy(performanceChart = result.data)
                 }
-                is Result.Error -> {
+                is OzyuceResult.Error -> {
                     _uiEvent.emit(UiEvent.ShowSnackbar("Performans grafi?i y?klenemedi", isError = true))
                 }
-                is Result.Loading -> { /* Handled by main loading */ }
+                is OzyuceResult.Loading -> { /* Handled by main loading */ }
             }
             
             // Load time analysis chart
             when (val result = getReportChartsUseCase.getTimeAnalysisChart(filter)) {
-                is Result.Success -> {
+                is OzyuceResult.Success -> {
                     _uiState.value = _uiState.value.copy(timeAnalysisChart = result.data)
                 }
-                is Result.Error -> {
+                is OzyuceResult.Error -> {
                     _uiEvent.emit(UiEvent.ShowSnackbar("Zaman analizi grafi?i y?klenemedi", isError = true))
                 }
-                is Result.Loading -> { /* Handled by main loading */ }
+                is OzyuceResult.Loading -> { /* Handled by main loading */ }
             }
         }
     }
@@ -189,15 +189,15 @@ class ReportsViewModel @Inject constructor(
             _uiState.value = _uiState.value.copy(isExporting = true)
             
             when (val result = reportsRepository.exportReportToPdf(dailyReport)) {
-                is Result.Success -> {
+                is OzyuceResult.Success -> {
                     _uiState.value = _uiState.value.copy(isExporting = false)
                     _uiEvent.emit(UiEvent.ShowSnackbar("Rapor PDF olarak kaydedildi: ${result.data}"))
                 }
-                is Result.Error -> {
+                is OzyuceResult.Error -> {
                     _uiState.value = _uiState.value.copy(isExporting = false)
                     _uiEvent.emit(UiEvent.ShowSnackbar("PDF olu?turulamad?", isError = true))
                 }
-                is Result.Loading -> {
+                is OzyuceResult.Loading -> {
                     _uiState.value = _uiState.value.copy(isExporting = true)
                 }
             }

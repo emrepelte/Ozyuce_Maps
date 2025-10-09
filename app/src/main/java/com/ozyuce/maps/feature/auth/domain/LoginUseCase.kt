@@ -1,6 +1,6 @@
 package com.ozyuce.maps.feature.auth.domain
 
-import com.ozyuce.maps.core.common.result.Result
+import com.ozyuce.maps.core.common.result.OzyuceResult
 import javax.inject.Inject
 
 /**
@@ -9,15 +9,15 @@ import javax.inject.Inject
 class LoginUseCase @Inject constructor(
     private val authRepository: AuthRepository
 ) {
-    suspend operator fun invoke(email: String, password: String): Result<AuthResult> {
+    suspend operator fun invoke(email: String, password: String): OzyuceResult<AuthResult> {
         // Email validation
         if (email.isBlank() || !android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-            return Result.Error(IllegalArgumentException("Ge?erli bir email adresi girin"))
+            return OzyuceResult.Error(IllegalArgumentException("Ge?erli bir email adresi girin"))
         }
         
         // Password validation
         if (password.isBlank() || password.length < 6) {
-            return Result.Error(IllegalArgumentException("?ifre en az 6 karakter olmal?d?r"))
+            return OzyuceResult.Error(IllegalArgumentException("?ifre en az 6 karakter olmal?d?r"))
         }
         
         return authRepository.login(email, password)

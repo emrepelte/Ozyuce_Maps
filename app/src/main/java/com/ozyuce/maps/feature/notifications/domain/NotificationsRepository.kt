@@ -1,18 +1,18 @@
 package com.ozyuce.maps.feature.notifications.domain
 
-import com.ozyuce.maps.core.common.result.Result
+import com.ozyuce.maps.core.common.result.OzyuceResult
 import com.google.android.gms.maps.model.LatLng
 
 /**
  * Bildirim i?lemleri i?in repository interface
  */
 interface NotificationsRepository {
-    suspend fun registerFcmToken(token: String): Result<Unit>
-    suspend fun subscribeToRoute(routeId: String): Result<Unit>
-    suspend fun unsubscribeFromRoute(routeId: String): Result<Unit>
-    suspend fun sendRouteDeviationAlert(routeId: String, location: LatLng): Result<Unit>
-    suspend fun sendStopSkippedAlert(routeId: String, stopId: String): Result<Unit>
-    suspend fun sendDelayAlert(routeId: String, delayMinutes: Int): Result<Unit>
+    suspend fun registerFcmToken(token: String): OzyuceResult<Unit>
+    suspend fun subscribeToRoute(routeId: String): OzyuceResult<Unit>
+    suspend fun unsubscribeFromRoute(routeId: String): OzyuceResult<Unit>
+    suspend fun sendRouteDeviationAlert(routeId: String, location: LatLng): OzyuceResult<Unit>
+    suspend fun sendStopSkippedAlert(routeId: String, stopId: String): OzyuceResult<Unit>
+    suspend fun sendDelayAlert(routeId: String, delayMinutes: Int): OzyuceResult<Unit>
 }
 
 /**

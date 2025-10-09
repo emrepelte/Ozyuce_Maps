@@ -5,7 +5,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
-    alias(libs.plugins.kotlin.kapt)
+    alias(libs.plugins.ksp)
     alias(libs.plugins.hilt)
     alias(libs.plugins.kotlin.serialization)
 }
@@ -164,12 +164,12 @@ dependencies {
     // Hilt
     implementation(libs.hilt.android)
     implementation(libs.hilt.navigation.compose)
-    kapt(libs.hilt.compiler)
+    ksp(libs.hilt.compiler)
 
     // Room
     implementation(libs.room.runtime)
     implementation(libs.room.ktx)
-    kapt(libs.room.compiler)
+    ksp(libs.room.compiler)
 
     // Retrofit & OkHttp
     implementation(libs.retrofit)
@@ -179,7 +179,7 @@ dependencies {
     implementation(libs.okhttp.logging)
     implementation(libs.moshi)
     implementation(libs.moshi.kotlin)
-    kapt(libs.moshi.codegen)
+    ksp(libs.moshi.codegen)
 
     // Serialization
     implementation(libs.kotlinxSerializationJson)
@@ -219,27 +219,11 @@ dependencies {
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     androidTestImplementation(libs.androidx.test.rules)
     androidTestImplementation(libs.hilt.android.testing)
-    kaptAndroidTest(libs.hilt.compiler)
+    kspAndroidTest(libs.hilt.compiler)
 
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
 }
-
-// BU KODU EKLEYİN
-val sqliteTmpDir = file("$buildDir/tmp/roomSqlite")
-
-kapt {
-    // Derleme başlamadan önce bu klasörün var olduğundan emin ol
-    sqliteTmpDir.mkdirs()
-
-    // Kapt işlemi için Java derleyici seçeneklerini ayarla
-    javacOptions {
-        // SQLite'a geçici klasörün yerini -D parametresi ile bildir
-        option("-J-Dorg.sqlite.tmpdir=${sqliteTmpDir.absolutePath}")
-        option("-J-Djava.io.tmpdir=${sqliteTmpDir.absolutePath}")
-    }
-}
-// EKLEME İŞLEMİ BURADA BİTİYOR
 
 kotlin {
     jvmToolchain(17)
@@ -247,6 +231,3 @@ kotlin {
         jvmTarget.set(JvmTarget.JVM_17)
     }
 }
-
-
-

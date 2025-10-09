@@ -1,7 +1,7 @@
 package com.ozyuce.maps.feature.stops.domain
 
 import com.ozyuce.maps.core.common.DispatcherProvider
-import com.ozyuce.maps.core.common.result.Result
+import com.ozyuce.maps.core.common.result.OzyuceResult
 import com.ozyuce.maps.feature.stops.domain.model.Personnel
 import com.ozyuce.maps.feature.stops.domain.model.PersonnelCheck
 import kotlinx.coroutines.withContext
@@ -21,11 +21,11 @@ class CheckPersonnelUseCase @Inject constructor(
         isChecked: Boolean,
         checkedBy: String,
         notes: String? = null
-    ): Result<Personnel> {
+    ): OzyuceResult<Personnel> {
         return withContext(dispatcherProvider.io) {
             // Validation
             if (personnelId.isBlank() || stopId.isBlank() || checkedBy.isBlank()) {
-                return@withContext Result.Error(IllegalArgumentException("Gerekli alanlar bo? olamaz"))
+                return@withContext OzyuceResult.Error(IllegalArgumentException("Gerekli alanlar bo? olamaz"))
             }
             
             val personnelCheck = PersonnelCheck(

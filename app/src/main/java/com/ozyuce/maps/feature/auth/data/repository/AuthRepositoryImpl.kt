@@ -6,7 +6,7 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import com.ozyuce.maps.core.common.Constants
 import com.ozyuce.maps.core.common.DispatcherProvider
-import com.ozyuce.maps.core.common.result.Result
+import com.ozyuce.maps.core.common.result.OzyuceResult
 import com.ozyuce.maps.core.network.NetworkUtils
 import com.ozyuce.maps.feature.auth.data.mapper.AuthMapper
 import com.ozyuce.maps.feature.auth.data.remote.AuthApi
@@ -33,7 +33,7 @@ class AuthRepositoryImpl @Inject constructor(
     private val userIdKey = stringPreferencesKey(Constants.USER_ID_KEY)
     private val userRoleKey = stringPreferencesKey(Constants.USER_ROLE_KEY)
     
-    override suspend fun login(email: String, password: String): Result<AuthResult> {
+    override suspend fun login(email: String, password: String): OzyuceResult<AuthResult> {
         return withContext(dispatchers.io) {
             // Demo mode - ger?ek API ?a?r?s? yerine mock data
             try {
@@ -57,12 +57,12 @@ class AuthRepositoryImpl @Inject constructor(
                         preferences[userRoleKey] = mockAuthResult.user.role
                     }
                     
-                    Result.Success(mockAuthResult)
+                    OzyuceResult.Success(mockAuthResult)
                 } else {
-                    Result.Error(Exception("Ge?ersiz email veya ?ifre"))
+                    OzyuceResult.Error(Exception("Ge?ersiz email veya ?ifre"))
                 }
             } catch (e: Exception) {
-                Result.Error(e)
+                OzyuceResult.Error(e)
             }
         }
     }
@@ -72,7 +72,7 @@ class AuthRepositoryImpl @Inject constructor(
         password: String,
         name: String,
         role: String
-    ): Result<AuthResult> {
+    ): OzyuceResult<AuthResult> {
         return withContext(dispatchers.io) {
             // Demo mode - ger?ek API ?a?r?s? yerine mock data
             try {
@@ -95,23 +95,23 @@ class AuthRepositoryImpl @Inject constructor(
                     preferences[userRoleKey] = mockAuthResult.user.role
                 }
                 
-                Result.Success(mockAuthResult)
+                OzyuceResult.Success(mockAuthResult)
             } catch (e: Exception) {
-                Result.Error(e)
+                OzyuceResult.Error(e)
             }
         }
     }
     
-    override suspend fun logout(): Result<Unit> {
+    override suspend fun logout(): OzyuceResult<Unit> {
         return withContext(dispatchers.io) {
             try {
                 // Demo mode - sadece local data temizle
                 clearAuthData()
-                Result.Success(Unit)
+                OzyuceResult.Success(Unit)
             } catch (e: Exception) {
                 // Network hatas? olsa bile local data'y? temizle
                 clearAuthData()
-                Result.Success(Unit)
+                OzyuceResult.Success(Unit)
             }
         }
     }

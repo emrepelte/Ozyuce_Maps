@@ -1,6 +1,6 @@
 package com.ozyuce.maps.feature.stops.data.repository
 
-import com.ozyuce.maps.core.common.result.Result
+import com.ozyuce.maps.core.common.result.OzyuceResult
 import com.ozyuce.maps.feature.stops.domain.StopsRepository
 import com.ozyuce.maps.feature.stops.domain.model.Stop
 import com.ozyuce.maps.feature.stops.domain.model.Personnel
@@ -29,32 +29,32 @@ class StopsRepositoryImpl @Inject constructor() : StopsRepository {
         initializeMockData()
     }
 
-    override suspend fun getStopsForRoute(routeId: String): Result<List<Stop>> {
+    override suspend fun getStopsForRoute(routeId: String): OzyuceResult<List<Stop>> {
         return try {
             kotlinx.coroutines.delay(500) // Network simulation
             
             val stops = getMockStopsForRoute(routeId)
             _stopsFlow.value = stops
             
-            Result.Success(stops)
+            OzyuceResult.Success(stops)
         } catch (e: Exception) {
-            Result.Error(e)
+            OzyuceResult.Error(e)
         }
     }
 
-    override suspend fun getPersonnelForStop(stopId: String): Result<List<Personnel>> {
+    override suspend fun getPersonnelForStop(stopId: String): OzyuceResult<List<Personnel>> {
         return try {
             kotlinx.coroutines.delay(300) // Network simulation
             
             val personnel = _personnelFlow.value.filter { it.stopId == stopId }
             
-            Result.Success(personnel)
+            OzyuceResult.Success(personnel)
         } catch (e: Exception) {
-            Result.Error(e)
+            OzyuceResult.Error(e)
         }
     }
 
-    override suspend fun getAllPersonnelForRoute(routeId: String): Result<List<Personnel>> {
+    override suspend fun getAllPersonnelForRoute(routeId: String): OzyuceResult<List<Personnel>> {
         return try {
             kotlinx.coroutines.delay(400) // Network simulation
             
@@ -62,13 +62,13 @@ class StopsRepositoryImpl @Inject constructor() : StopsRepository {
             val stopIds = stops.map { it.id }
             val personnel = _personnelFlow.value.filter { it.stopId in stopIds }
             
-            Result.Success(personnel)
+            OzyuceResult.Success(personnel)
         } catch (e: Exception) {
-            Result.Error(e)
+            OzyuceResult.Error(e)
         }
     }
 
-    override suspend fun checkPersonnel(personnelCheck: PersonnelCheck): Result<Personnel> {
+    override suspend fun checkPersonnel(personnelCheck: PersonnelCheck): OzyuceResult<Personnel> {
         return try {
             kotlinx.coroutines.delay(600) // Network simulation
             
@@ -76,7 +76,7 @@ class StopsRepositoryImpl @Inject constructor() : StopsRepository {
             val index = currentPersonnel.indexOfFirst { it.id == personnelCheck.personnelId }
             
             if (index == -1) {
-                return Result.Error(Exception("Personel bulunamad?"))
+                return OzyuceResult.Error(Exception("Personel bulunamad?"))
             }
             
             val updatedPersonnel = currentPersonnel[index].copy(
@@ -92,13 +92,13 @@ class StopsRepositoryImpl @Inject constructor() : StopsRepository {
             // Update stop completion status
             updateStopCompletionStatus(personnelCheck.stopId)
             
-            Result.Success(updatedPersonnel)
+            OzyuceResult.Success(updatedPersonnel)
         } catch (e: Exception) {
-            Result.Error(e)
+            OzyuceResult.Error(e)
         }
     }
 
-    override suspend fun addPersonnel(request: AddPersonnelRequest): Result<Personnel> {
+    override suspend fun addPersonnel(request: AddPersonnelRequest): OzyuceResult<Personnel> {
         return try {
             kotlinx.coroutines.delay(800) // Network simulation
             
@@ -122,13 +122,13 @@ class StopsRepositoryImpl @Inject constructor() : StopsRepository {
             // Update stop personnel count
             updateStopPersonnelCount(request.stopId)
             
-            Result.Success(newPersonnel)
+            OzyuceResult.Success(newPersonnel)
         } catch (e: Exception) {
-            Result.Error(e)
+            OzyuceResult.Error(e)
         }
     }
 
-    override suspend fun completeStop(stopId: String): Result<Stop> {
+    override suspend fun completeStop(stopId: String): OzyuceResult<Stop> {
         return try {
             kotlinx.coroutines.delay(400) // Network simulation
             
@@ -136,7 +136,7 @@ class StopsRepositoryImpl @Inject constructor() : StopsRepository {
             val index = currentStops.indexOfFirst { it.id == stopId }
             
             if (index == -1) {
-                return Result.Error(Exception("Durak bulunamad?"))
+                return OzyuceResult.Error(Exception("Durak bulunamad?"))
             }
             
             val updatedStop = currentStops[index].copy(
@@ -147,9 +147,9 @@ class StopsRepositoryImpl @Inject constructor() : StopsRepository {
             currentStops[index] = updatedStop
             _stopsFlow.value = currentStops
             
-            Result.Success(updatedStop)
+            OzyuceResult.Success(updatedStop)
         } catch (e: Exception) {
-            Result.Error(e)
+            OzyuceResult.Error(e)
         }
     }
 

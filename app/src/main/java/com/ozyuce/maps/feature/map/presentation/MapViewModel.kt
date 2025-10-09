@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.android.gms.maps.model.LatLng
 import com.ozyuce.maps.core.common.DispatcherProvider
-import com.ozyuce.maps.core.common.result.Result
+import com.ozyuce.maps.core.common.result.OzyuceResult
 import com.ozyuce.maps.core.network.NetworkUtils
 import com.ozyuce.maps.feature.map.domain.CalculateEtaUseCase
 import com.ozyuce.maps.feature.map.domain.GetRouteDetailsUseCase
@@ -62,7 +62,7 @@ class MapViewModel @Inject constructor(
             val routeId = "route_001" // TODO: Aktif rota bilgisini ServiceRepository'den oku
 
             when (val result = getRouteDetailsUseCase(routeId)) {
-                is Result.Success -> {
+                is OzyuceResult.Success -> {
                     val (polyline, stops) = result.data
                     _uiState.update { state ->
                         state.copy(
@@ -75,12 +75,12 @@ class MapViewModel @Inject constructor(
                         calculateEta(stop.location)
                     }
                 }
-                is Result.Error -> {
+                is OzyuceResult.Error -> {
                     _uiState.update { it.copy(isLoading = false) }
                     _uiEvent.emit(UiEvent.ShowSnackbar(NetworkUtils.getErrorMessage(result.exception), isError = true))
                     Timber.e(result.exception, "Error loading route details")
                 }
-                Result.Loading -> _uiState.update { it.copy(isLoading = true) }
+                OzyuceResult.Loading -> _uiState.update { it.copy(isLoading = true) }
             }
 
             getRouteDetailsUseCase.getStopMarkersFlow(routeId).collectLatest { stops ->
@@ -153,9 +153,9 @@ class MapViewModel @Inject constructor(
     private suspend fun calculateEta(destination: LatLng) {
         _uiState.value.vehicleLocation?.let { vehicle ->
             when (val result = calculateEtaUseCase(vehicle.location, listOf(destination))) {
-                is Result.Success -> _uiState.update { it.copy(routeEta = result.data.firstOrNull()) }
-                is Result.Error -> Timber.e(result.exception, "Error calculating ETA")
-                Result.Loading -> Unit
+                is OzyuceResult.Success -> _uiState.update { it.copy(routeEta = result.data.firstOrNull()) }
+                is OzyuceResult.Error -> Timber.e(result.exception, "Error calculating ETA")
+                OzyuceResult.Loading -> Unit
             }
         }
     }

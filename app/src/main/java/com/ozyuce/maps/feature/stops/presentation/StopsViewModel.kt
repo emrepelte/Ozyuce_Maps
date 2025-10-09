@@ -2,7 +2,7 @@ package com.ozyuce.maps.feature.stops.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.ozyuce.maps.core.common.result.Result
+import com.ozyuce.maps.core.common.result.OzyuceResult
 import com.ozyuce.maps.feature.stops.domain.AddPersonnelUseCase
 import com.ozyuce.maps.feature.stops.domain.CheckPersonnelUseCase
 import com.ozyuce.maps.feature.stops.domain.GetPersonnelUseCase
@@ -56,7 +56,7 @@ class StopsViewModel @Inject constructor(
             _uiState.value = _uiState.value.copy(isLoading = true)
             
             when (val result = getStopsUseCase(routeId)) {
-                is Result.Success -> {
+                is OzyuceResult.Success -> {
                     _uiState.value = _uiState.value.copy(
                         isLoading = false,
                         stops = result.data,
@@ -68,13 +68,13 @@ class StopsViewModel @Inject constructor(
                         selectStop(result.data.first())
                     }
                 }
-                is Result.Error -> {
+                is OzyuceResult.Error -> {
                     _uiState.value = _uiState.value.copy(
                         isLoading = false,
                         error = "Duraklar y?klenemedi: ${result.exception.message}"
                     )
                 }
-                is Result.Loading -> {
+                is OzyuceResult.Loading -> {
                     _uiState.value = _uiState.value.copy(isLoading = true)
                 }
             }
@@ -84,15 +84,15 @@ class StopsViewModel @Inject constructor(
     private fun loadAllPersonnelForRoute(routeId: String) {
         viewModelScope.launch {
             when (val result = getPersonnelUseCase.getAllForRoute(routeId)) {
-                is Result.Success -> {
+                is OzyuceResult.Success -> {
                     _uiState.value = _uiState.value.copy(
                         allPersonnel = result.data
                     )
                 }
-                is Result.Error -> {
+                is OzyuceResult.Error -> {
                     _uiEvent.emit(UiEvent.ShowSnackbar("Personel bilgileri y?klenemedi", isError = true))
                 }
-                is Result.Loading -> { /* Handled by stops loading */ }
+                is OzyuceResult.Loading -> { /* Handled by stops loading */ }
             }
         }
     }
@@ -113,15 +113,15 @@ class StopsViewModel @Inject constructor(
     private fun loadPersonnelForStop(stopId: String) {
         viewModelScope.launch {
             when (val result = getPersonnelUseCase(stopId)) {
-                is Result.Success -> {
+                is OzyuceResult.Success -> {
                     _uiState.value = _uiState.value.copy(
                         selectedStopPersonnel = result.data
                     )
                 }
-                is Result.Error -> {
+                is OzyuceResult.Error -> {
                     _uiEvent.emit(UiEvent.ShowSnackbar("Personel listesi y?klenemedi", isError = true))
                 }
-                is Result.Loading -> { /* Already handled */ }
+                is OzyuceResult.Loading -> { /* Already handled */ }
             }
         }
     }
@@ -139,7 +139,7 @@ class StopsViewModel @Inject constructor(
                 checkedBy = "demo_driver_id", // TODO: Ger?ek s?r?c? ID'si
                 notes = notes
             )) {
-                is Result.Success -> {
+                is OzyuceResult.Success -> {
                     _uiState.value = _uiState.value.copy(isLoading = false)
                     
                     // Personel listesini g?ncelle
@@ -151,14 +151,14 @@ class StopsViewModel @Inject constructor(
                     // Durak personelini yeniden y?kle
                     loadPersonnelForStop(selectedStop.id)
                 }
-                is Result.Error -> {
+                is OzyuceResult.Error -> {
                     _uiState.value = _uiState.value.copy(isLoading = false)
                     _uiEvent.emit(UiEvent.ShowSnackbar(
                         result.exception.message ?: "Personel i?aretlenirken hata olu?tu", 
                         isError = true
                     ))
                 }
-                is Result.Loading -> {
+                is OzyuceResult.Loading -> {
                     _uiState.value = _uiState.value.copy(isLoading = true)
                 }
             }
@@ -177,23 +177,23 @@ class StopsViewModel @Inject constructor(
                 stopId = selectedStop.id,
                 phoneNumber = phoneNumber
             )) {
-                is Result.Success -> {
+                is OzyuceResult.Success -> {
                     _uiState.value = _uiState.value.copy(isLoading = false)
                     
-                    _uiEvent.emit(UiEvent.ShowSnackbar("${result.data.fullName} başarıyla eklendi"))
+                    _uiEvent.emit(UiEvent.ShowSnackbar("${result.data.fullName} ba?ar?yla eklendi"))
                     
                     // Personel listelerini yeniden y?kle
                     loadPersonnelForStop(selectedStop.id)
                     loadAllPersonnelForRoute(_uiState.value.currentRouteId)
                 }
-                is Result.Error -> {
+                is OzyuceResult.Error -> {
                     _uiState.value = _uiState.value.copy(isLoading = false)
                     _uiEvent.emit(UiEvent.ShowSnackbar(
                         result.exception.message ?: "Personel eklenirken hata olu?tu", 
                         isError = true
                     ))
                 }
-                is Result.Loading -> {
+                is OzyuceResult.Loading -> {
                     _uiState.value = _uiState.value.copy(isLoading = true)
                 }
             }
@@ -205,16 +205,16 @@ class StopsViewModel @Inject constructor(
         
         viewModelScope.launch {
             when (val result = stopsRepository.completeStop(selectedStop.id)) {
-                is Result.Success -> {
+                is OzyuceResult.Success -> {
                     _uiEvent.emit(UiEvent.ShowSnackbar("${selectedStop.name} tamamland?"))
                     
                     // Dura?? g?ncelle
                     updateStopInList(result.data)
                 }
-                is Result.Error -> {
+                is OzyuceResult.Error -> {
                     _uiEvent.emit(UiEvent.ShowSnackbar("Durak tamamlan?rken hata olu?tu", isError = true))
                 }
-                is Result.Loading -> { /* Loading state already handled */ }
+                is OzyuceResult.Loading -> { /* Loading state already handled */ }
             }
         }
     }

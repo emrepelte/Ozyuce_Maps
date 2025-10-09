@@ -1,6 +1,6 @@
 package com.ozyuce.maps.feature.service.data.repository
 
-import com.ozyuce.maps.core.common.result.Result
+import com.ozyuce.maps.core.common.result.OzyuceResult
 import com.ozyuce.maps.core.database.dao.ServiceSessionDao
 import com.ozyuce.maps.core.database.entity.ServiceSessionEntity
 import com.ozyuce.maps.feature.service.domain.ServiceRepository
@@ -21,7 +21,7 @@ class ServiceRepositoryImpl @Inject constructor(
     private val serviceSessionDao: ServiceSessionDao
 ) : ServiceRepository {
 
-    override suspend fun startService(routeId: String): Result<ServiceSession> {
+    override suspend fun startService(routeId: String): OzyuceResult<ServiceSession> {
         return try {
             // Demo mode - ger?ek API ?a?r?s? yerine mock data
             kotlinx.coroutines.delay(1000) // Network simulation
@@ -52,13 +52,13 @@ class ServiceRepositoryImpl @Inject constructor(
             )
             serviceSessionDao.insertSession(entity)
             
-            Result.Success(mockSession)
+            OzyuceResult.Success(mockSession)
         } catch (e: Exception) {
-            Result.Error(e)
+            OzyuceResult.Error(e)
         }
     }
 
-    override suspend fun endService(sessionId: String): Result<ServiceSession> {
+    override suspend fun endService(sessionId: String): OzyuceResult<ServiceSession> {
         return try {
             kotlinx.coroutines.delay(800) // Network simulation
             
@@ -68,7 +68,7 @@ class ServiceRepositoryImpl @Inject constructor(
             // Mock ended session
             val endedSession = getCurrentSession().let { result ->
                 when (result) {
-                    is Result.Success -> result.data?.copy(
+                    is OzyuceResult.Success -> result.data?.copy(
                         endTime = endTime,
                         isActive = false,
                         totalDistance = Random.nextDouble(15.0, 50.0), // Mock distance
@@ -81,22 +81,22 @@ class ServiceRepositoryImpl @Inject constructor(
             }
             
             if (endedSession != null) {
-                Result.Success(endedSession)
+                OzyuceResult.Success(endedSession)
             } else {
-                Result.Error(Exception("Servis bitirilemedi"))
+                OzyuceResult.Error(Exception("Servis bitirilemedi"))
             }
         } catch (e: Exception) {
-            Result.Error(e)
+            OzyuceResult.Error(e)
         }
     }
 
-    override suspend fun getCurrentSession(): Result<ServiceSession?> {
+    override suspend fun getCurrentSession(): OzyuceResult<ServiceSession?> {
         return try {
             val entity = serviceSessionDao.getCurrentSession()
             val session = entity?.let { mapEntityToDomain(it) }
-            Result.Success(session)
+            OzyuceResult.Success(session)
         } catch (e: Exception) {
-            Result.Error(e)
+            OzyuceResult.Error(e)
         }
     }
 
@@ -106,7 +106,7 @@ class ServiceRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun getAvailableRoutes(): Result<List<Route>> {
+    override suspend fun getAvailableRoutes(): OzyuceResult<List<Route>> {
         return try {
             kotlinx.coroutines.delay(500) // Network simulation
             
@@ -138,19 +138,19 @@ class ServiceRepositoryImpl @Inject constructor(
                 )
             )
             
-            Result.Success(mockRoutes)
+            OzyuceResult.Success(mockRoutes)
         } catch (e: Exception) {
-            Result.Error(e)
+            OzyuceResult.Error(e)
         }
     }
 
-    override suspend fun getServiceHistory(): Result<List<ServiceSession>> {
+    override suspend fun getServiceHistory(): OzyuceResult<List<ServiceSession>> {
         return try {
             val entities = serviceSessionDao.getSessionHistory("demo_driver_id")
             val sessions = entities.map { mapEntityToDomain(it) }
-            Result.Success(sessions)
+            OzyuceResult.Success(sessions)
         } catch (e: Exception) {
-            Result.Error(e)
+            OzyuceResult.Error(e)
         }
     }
 

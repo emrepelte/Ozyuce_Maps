@@ -1,6 +1,6 @@
 package com.ozyuce.maps.core.network
 
-import com.ozyuce.maps.core.common.result.Result
+import com.ozyuce.maps.core.common.result.OzyuceResult
 import retrofit2.HttpException
 import retrofit2.Response
 import java.io.IOException
@@ -13,40 +13,40 @@ import java.net.UnknownHostException
 object NetworkUtils {
     
     /**
-     * Retrofit Response'? Result<T>'ye d?n??t?r?r
+     * Retrofit Response'? OzyuceResult<T>'ye d?n??t?r?r
      */
-    suspend fun <T> safeApiCall(apiCall: suspend () -> Response<T>): Result<T> {
+    suspend fun <T> safeApiCall(apiCall: suspend () -> Response<T>): OzyuceResult<T> {
         return try {
             val response = apiCall()
             if (response.isSuccessful) {
                 response.body()?.let { data ->
-                    Result.Success(data)
-                } ?: Result.Error(Exception("Response body is null"))
+                    OzyuceResult.Success(data)
+                } ?: OzyuceResult.Error(Exception("Response body is null"))
             } else {
-                Result.Error(HttpException(response))
+                OzyuceResult.Error(HttpException(response))
             }
         } catch (e: Exception) {
-            Result.Error(mapNetworkException(e))
+            OzyuceResult.Error(mapNetworkException(e))
         }
     }
     
     /**
-     * ApiResponse<T> format?ndaki response'lar? Result<T>'ye d?n??t?r?r
+     * ApiResponse<T> format?ndaki response'lar? OzyuceResult<T>'ye d?n??t?r?r
      */
     suspend fun <T> safeApiCallWithWrapper(
         apiCall: suspend () -> Response<ApiResponse<T>>
-    ): Result<T> {
+    ): OzyuceResult<T> {
         return try {
             val response = apiCall()
             if (response.isSuccessful) {
                 response.body()?.let { apiResponse ->
                     if (apiResponse.success) {
                         apiResponse.data?.let { data ->
-                            Result.Success(data)
-                        } ?: Result.Error(Exception("Data is null"))
+                            OzyuceResult.Success(data)
+                        } ?: OzyuceResult.Error(Exception("Data is null"))
                     } else {
                         val error = apiResponse.error
-                        Result.Error(
+                        OzyuceResult.Error(
                             if (error != null) {
                                 NetworkException.ApiError(error)
                             } else {
@@ -54,9 +54,9 @@ object NetworkUtils {
                             }
                         )
                     }
-                } ?: Result.Error(Exception("Response body is null"))
+                } ?: OzyuceResult.Error(Exception("Response body is null"))
             } else {
-                Result.Error(
+                OzyuceResult.Error(
                     NetworkException.ServerError(
                         response.code(),
                         response.message()
@@ -64,7 +64,7 @@ object NetworkUtils {
                 )
             }
         } catch (e: Exception) {
-            Result.Error(mapNetworkException(e))
+            OzyuceResult.Error(mapNetworkException(e))
         }
     }
     
@@ -94,22 +94,22 @@ object NetworkUtils {
     
     // Ge?ici olarak kapat?ld? - Demo mode i?in API ?a?r?s? yap?lm?yor
     /*
-    suspend fun <T> safeApiCallWithWrapper(apiCall: suspend () -> retrofit2.Response<com.ozyuce.maps.core.network.ApiResponse<T>>): Result<T> {
+    suspend fun <T> safeApiCallWithWrapper(apiCall: suspend () -> retrofit2.Response<com.ozyuce.maps.core.network.ApiResponse<T>>): OzyuceResult<T> {
         return try {
             val response = apiCall()
             if (response.isSuccessful) {
                 val body = response.body()
                 when {
-                    body == null -> Result.Error(Exception("Bo? yan?t al?nd?"))
-                    body is com.ozyuce.maps.core.network.ApiResponse.Success -> Result.Success(body.data)
-                    body is com.ozyuce.maps.core.network.ApiResponse.Error -> Result.Error(Exception(body.message ?: "API hatas?"))
-                    else -> Result.Error(Exception("Bilinmeyen API yan?t?"))
+                    body == null -> OzyuceResult.Error(Exception("Bo? yan?t al?nd?"))
+                    body is com.ozyuce.maps.core.network.ApiResponse.Success -> OzyuceResult.Success(body.data)
+                    body is com.ozyuce.maps.core.network.ApiResponse.Error -> OzyuceResult.Error(Exception(body.message ?: "API hatas?"))
+                    else -> OzyuceResult.Error(Exception("Bilinmeyen API yan?t?"))
                 }
             } else {
-                Result.Error(Exception("HTTP ${response.code()}: ${response.message()}"))
+                OzyuceResult.Error(Exception("HTTP ${response.code()}: ${response.message()}"))
             }
         } catch (e: Exception) {
-            Result.Error(mapNetworkException(e))
+            OzyuceResult.Error(mapNetworkException(e))
         }
     }
     */

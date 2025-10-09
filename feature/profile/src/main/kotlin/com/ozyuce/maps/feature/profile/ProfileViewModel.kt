@@ -12,7 +12,7 @@ import com.ozyuce.maps.feature.profile.data.ThemeMode
 import com.ozyuce.maps.feature.profile.data.UserPreferences
 import com.ozyuce.maps.feature.profile.logout.ProfileLogoutHandler
 import com.ozyuce.maps.feature.profile.theme.ThemeManager
-import com.ozyuce.maps.core.common.result.Result as AppResult
+import com.ozyuce.maps.core.common.result.OzyuceResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -147,15 +147,15 @@ class ProfileViewModel @Inject constructor(
         viewModelScope.launch {
             dismissDialog()
             when (val result = logoutHandler.logout()) {
-                is AppResult.Success -> {
+                is OzyuceResult.Success -> {
                     Timber.i("Kullanıcı oturumu kapatıldı")
                     _uiEvent.emit(ProfileUiEvent.LogoutSuccess)
                 }
-                is AppResult.Error -> {
+                is OzyuceResult.Error -> {
                     Timber.e(result.exception, "Çıkış işlemi başarısız")
                     _uiEvent.emit(ProfileUiEvent.ShowSnackbar("Çıkış yapılırken bir hata oluştu"))
                 }
-                AppResult.Loading -> Unit
+                OzyuceResult.Loading -> Unit
             }
         }
     }

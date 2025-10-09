@@ -1,7 +1,7 @@
 package com.ozyuce.maps.feature.auth.domain
 
 import com.ozyuce.maps.core.common.Constants
-import com.ozyuce.maps.core.common.result.Result
+import com.ozyuce.maps.core.common.result.OzyuceResult
 import com.ozyuce.maps.feature.auth.domain.model.UserRole
 import javax.inject.Inject
 
@@ -16,26 +16,26 @@ class RegisterUseCase @Inject constructor(
         password: String, 
         name: String, 
         role: String
-    ): Result<AuthResult> {
+    ): OzyuceResult<AuthResult> {
         
         // Name validation
         if (name.isBlank() || name.length < 2) {
-            return Result.Error(IllegalArgumentException("?sim en az 2 karakter olmal?d?r"))
+            return OzyuceResult.Error(IllegalArgumentException("?sim en az 2 karakter olmal?d?r"))
         }
         
         // Email validation
         if (email.isBlank() || !android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-            return Result.Error(IllegalArgumentException("Ge?erli bir email adresi girin"))
+            return OzyuceResult.Error(IllegalArgumentException("Ge?erli bir email adresi girin"))
         }
         
         // Password validation
         if (password.isBlank() || password.length < 6) {
-            return Result.Error(IllegalArgumentException("?ifre en az 6 karakter olmal?d?r"))
+            return OzyuceResult.Error(IllegalArgumentException("?ifre en az 6 karakter olmal?d?r"))
         }
         
         // Role validation
         if (role !in listOf(UserRole.DRIVER.name, UserRole.CUSTOMER.name)) {
-            return Result.Error(IllegalArgumentException("Ge?ersiz kullan?c? rol?"))
+            return OzyuceResult.Error(IllegalArgumentException("Ge?ersiz kullan?c? rol?"))
         }
         
         return authRepository.register(email, password, name, role)

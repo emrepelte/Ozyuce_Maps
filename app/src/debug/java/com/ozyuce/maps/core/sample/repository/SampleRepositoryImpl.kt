@@ -1,7 +1,7 @@
 package com.ozyuce.maps.core.sample.repository
 
 import com.google.android.gms.maps.model.LatLng
-import com.ozyuce.maps.core.common.result.Result
+import com.ozyuce.maps.core.common.result.OzyuceResult
 import com.ozyuce.maps.core.sample.SampleDataProvider
 import com.ozyuce.maps.core.sample.model.SamplePerson
 import com.ozyuce.maps.core.sample.model.SampleRoute
@@ -61,19 +61,19 @@ class SampleServiceRepositoryImpl @Inject constructor(
     private val currentSession = MutableStateFlow<ServiceSession?>(null)
     private val history = mutableListOf<ServiceSession>()
 
-    override suspend fun startService(routeId: String): Result<ServiceSession> {
+    override suspend fun startService(routeId: String): OzyuceResult<ServiceSession> {
         delay(150)
         val route = routeVariants.firstOrNull { it.id == routeId } ?: routeVariants.first()
         val session = sampleDataProvider.createServiceSession(route.id).toDomain()
         currentSession.value = session
-        return Result.Success(session)
+        return OzyuceResult.Success(session)
     }
 
-    override suspend fun endService(sessionId: String): Result<ServiceSession> {
+    override suspend fun endService(sessionId: String): OzyuceResult<ServiceSession> {
         delay(150)
-        val session = currentSession.value ?: return Result.Error(IllegalStateException("Aktif servis bulunamadi"))
+        val session = currentSession.value ?: return OzyuceResult.Error(IllegalStateException("Aktif servis bulunamadi"))
         if (session.id != sessionId) {
-            return Result.Error(IllegalArgumentException("Servis kimligi eslesmedi"))
+            return OzyuceResult.Error(IllegalArgumentException("Servis kimligi eslesmedi"))
         }
         val ended = session.copy(
             endTime = Date(),
@@ -85,24 +85,24 @@ class SampleServiceRepositoryImpl @Inject constructor(
         )
         history.add(0, ended)
         currentSession.value = ended
-        return Result.Success(ended)
+        return OzyuceResult.Success(ended)
     }
 
-    override suspend fun getCurrentSession(): Result<ServiceSession?> {
+    override suspend fun getCurrentSession(): OzyuceResult<ServiceSession?> {
         delay(100)
-        return Result.Success(currentSession.value)
+        return OzyuceResult.Success(currentSession.value)
     }
 
     override fun getCurrentSessionFlow(): Flow<ServiceSession?> = currentSession.asStateFlow()
 
-    override suspend fun getAvailableRoutes(): Result<List<Route>> {
+    override suspend fun getAvailableRoutes(): OzyuceResult<List<Route>> {
         delay(100)
-        return Result.Success(routeVariants)
+        return OzyuceResult.Success(routeVariants)
     }
 
-    override suspend fun getServiceHistory(): Result<List<ServiceSession>> {
+    override suspend fun getServiceHistory(): OzyuceResult<List<ServiceSession>> {
         delay(120)
-        return Result.Success(history.take(5))
+        return OzyuceResult.Success(history.take(5))
     }
 
     private fun SampleRoute.toServiceRoute(): Route {
@@ -148,27 +148,27 @@ class SampleStopsRepositoryImpl @Inject constructor(
         stop.id to stop.personnel.map { it.toDomain(stop) }
     })
 
-    override suspend fun getStopsForRoute(routeId: String): Result<List<Stop>> {
+    override suspend fun getStopsForRoute(routeId: String): OzyuceResult<List<Stop>> {
         delay(120)
-        return Result.Success(stopsState.value)
+        return OzyuceResult.Success(stopsState.value)
     }
 
-    override suspend fun getPersonnelForStop(stopId: String): Result<List<Personnel>> {
+    override suspend fun getPersonnelForStop(stopId: String): OzyuceResult<List<Personnel>> {
         delay(80)
-        return Result.Success(personnelState.value[stopId].orEmpty())
+        return OzyuceResult.Success(personnelState.value[stopId].orEmpty())
     }
 
-    override suspend fun getAllPersonnelForRoute(routeId: String): Result<List<Personnel>> {
+    override suspend fun getAllPersonnelForRoute(routeId: String): OzyuceResult<List<Personnel>> {
         delay(100)
-        return Result.Success(personnelState.value.values.flatten())
+        return OzyuceResult.Success(personnelState.value.values.flatten())
     }
 
-    override suspend fun checkPersonnel(personnelCheck: PersonnelCheck): Result<Personnel> {
+    override suspend fun checkPersonnel(personnelCheck: PersonnelCheck): OzyuceResult<Personnel> {
         delay(60)
         val personnelMap = personnelState.value.toMutableMap()
-        val list = personnelMap[personnelCheck.stopId]?.toMutableList() ?: return Result.Error(IllegalArgumentException("Personel bulunamadi"))
+        val list = personnelMap[personnelCheck.stopId]?.toMutableList() ?: return OzyuceResult.Error(IllegalArgumentException("Personel bulunamadi"))
         val index = list.indexOfFirst { it.id == personnelCheck.personnelId }
-        if (index == -1) return Result.Error(IllegalArgumentException("Personel bulunamadi"))
+        if (index == -1) return OzyuceResult.Error(IllegalArgumentException("Personel bulunamadi"))
 
         val updated = list[index].copy(
             isChecked = personnelCheck.isChecked,
@@ -180,10 +180,10 @@ class SampleStopsRepositoryImpl @Inject constructor(
         personnelMap[personnelCheck.stopId] = list
         personnelState.value = personnelMap
         refreshStop(personnelCheck.stopId)
-        return Result.Success(updated)
+        return OzyuceResult.Success(updated)
     }
 
-    override suspend fun addPersonnel(request: AddPersonnelRequest): Result<Personnel> {
+    override suspend fun addPersonnel(request: AddPersonnelRequest): OzyuceResult<Personnel> {
         delay(120)
         val newPersonnel = Personnel(
             id = "person_",
@@ -200,21 +200,21 @@ class SampleStopsRepositoryImpl @Inject constructor(
         personnelMap[request.stopId] = list
         personnelState.value = personnelMap
         refreshStop(request.stopId)
-        return Result.Success(newPersonnel)
+        return OzyuceResult.Success(newPersonnel)
     }
 
-    override suspend fun completeStop(stopId: String): Result<Stop> {
+    override suspend fun completeStop(stopId: String): OzyuceResult<Stop> {
         delay(100)
         val stops = stopsState.value.toMutableList()
         val index = stops.indexOfFirst { it.id == stopId }
-        if (index == -1) return Result.Error(IllegalArgumentException("Durak bulunamadi"))
+        if (index == -1) return OzyuceResult.Error(IllegalArgumentException("Durak bulunamadi"))
         val completed = stops[index].copy(
             isCompleted = true,
             checkedPersonnelCount = personnelState.value[stopId]?.count { it.isChecked } ?: 0
         )
         stops[index] = completed
         stopsState.value = stops
-        return Result.Success(completed)
+        return OzyuceResult.Success(completed)
     }
 
     override fun getStopsFlow(routeId: String): Flow<List<Stop>> = stopsState.asStateFlow()
@@ -285,7 +285,7 @@ class SampleMapRepositoryImpl @Inject constructor(
         location: LatLng,
         heading: Float,
         speed: Float
-    ): Result<VehicleLocation> {
+    ): OzyuceResult<VehicleLocation> {
         delay(50)
         val updated = VehicleLocation(
             id = "vehicle_",
@@ -297,7 +297,7 @@ class SampleMapRepositoryImpl @Inject constructor(
             timestamp = Date()
         )
         vehicleLocation.value = updated
-        return Result.Success(updated)
+        return OzyuceResult.Success(updated)
     }
 
     override fun getVehicleLocationFlow(): Flow<VehicleLocation?> = vehicleLocation.asStateFlow()
@@ -306,12 +306,12 @@ class SampleMapRepositoryImpl @Inject constructor(
 
     override suspend fun stopLocationUpdates() { /* no-op for sample */ }
 
-    override suspend fun getRoutePolyline(routeId: String): Result<RoutePolyline> {
+    override suspend fun getRoutePolyline(routeId: String): OzyuceResult<RoutePolyline> {
         delay(80)
         val points = route.polyline
         val distance = samplePolylineDistance(points)
         val duration = max(route.stops.size * 12, 30)
-        return Result.Success(
+        return OzyuceResult.Success(
             RoutePolyline(
                 routeId = routeId,
                 points = points,
@@ -322,19 +322,19 @@ class SampleMapRepositoryImpl @Inject constructor(
         )
     }
 
-    override suspend fun getStopMarkers(routeId: String): Result<List<StopMarker>> {
+    override suspend fun getStopMarkers(routeId: String): OzyuceResult<List<StopMarker>> {
         delay(60)
-        return Result.Success(sampleStopsRepository.currentStops().toMarkers())
+        return OzyuceResult.Success(sampleStopsRepository.currentStops().toMarkers())
     }
 
     override fun getStopMarkersFlow(routeId: String): Flow<List<StopMarker>> {
         return sampleStopsRepository.stopsStateFlow().map { it.toMarkers() }
     }
 
-    override suspend fun calculateEta(origin: LatLng, destination: LatLng): Result<RouteEta> {
+    override suspend fun calculateEta(origin: LatLng, destination: LatLng): OzyuceResult<RouteEta> {
         delay(40)
         val duration = 20 + Random.nextInt(0, 15)
-        return Result.Success(
+        return OzyuceResult.Success(
             RouteEta(
                 stopId = "eta__",
                 estimatedArrival = Date(System.currentTimeMillis() + duration * 60 * 1000L),
@@ -348,7 +348,7 @@ class SampleMapRepositoryImpl @Inject constructor(
     override suspend fun calculateBatchEta(
         origin: LatLng,
         destinations: List<LatLng>
-    ): Result<List<RouteEta>> {
+    ): OzyuceResult<List<RouteEta>> {
         delay(60)
         val results = destinations.mapIndexed { index, dest ->
             val baseDuration = 15 + index * 5
@@ -360,7 +360,7 @@ class SampleMapRepositoryImpl @Inject constructor(
                 trafficDuration = baseDuration + 3
             )
         }
-        return Result.Success(results)
+        return OzyuceResult.Success(results)
     }
 
     override suspend fun connectWebSocket() { /* no-op */ }
@@ -412,7 +412,7 @@ class SampleReportsRepositoryImpl @Inject constructor(
 
     private val dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
 
-    override suspend fun getDailyReport(date: String, routeId: String): Result<DailyReport> {
+    override suspend fun getDailyReport(date: String, routeId: String): OzyuceResult<DailyReport> {
         delay(120)
         val stops = sampleStopsRepository.currentStops()
         val totalPersonnel = stops.sumOf { it.personnelCount }
@@ -449,17 +449,17 @@ class SampleReportsRepositoryImpl @Inject constructor(
             timeAnalysis = timeAnalysis,
             performanceMetrics = performance
         )
-        return Result.Success(report)
+        return OzyuceResult.Success(report)
     }
 
-    override suspend fun getWeeklyReport(weekStartDate: String, routeId: String): Result<WeeklyReport> {
+    override suspend fun getWeeklyReport(weekStartDate: String, routeId: String): OzyuceResult<WeeklyReport> {
         delay(160)
         val dailyReports = (0 until 7).map { offset ->
             val date = LocalDate.parse(weekStartDate, dateFormatter).plusDays(offset.toLong())
             when (val result = getDailyReport(dateFormatter.format(date), routeId)) {
-                is Result.Success -> result.data
-                is Result.Error -> throw result.exception
-                Result.Loading -> throw IllegalStateException("Unexpected loading state")
+                is OzyuceResult.Success -> result.data
+                is OzyuceResult.Error -> throw result.exception
+                OzyuceResult.Loading -> throw IllegalStateException("Unexpected loading state")
             }
         }
         val weekSummary = WeeklySummary(
@@ -486,17 +486,17 @@ class SampleReportsRepositoryImpl @Inject constructor(
             weekSummary = weekSummary,
             trends = trends
         )
-        return Result.Success(report)
+        return OzyuceResult.Success(report)
     }
 
-    override suspend fun getReportSummary(filter: ReportFilter): Result<ReportSummary> {
+    override suspend fun getReportSummary(filter: ReportFilter): OzyuceResult<ReportSummary> {
         val today = dateFormatter.format(LocalDate.now())
         return getDailyReport(today, filter.routeId ?: sampleServiceRepository.getAvailableRoutes().let { result ->
-            if (result is Result.Success) result.data.first().id else "route_1"
+            if (result is OzyuceResult.Success) result.data.first().id else "route_1"
         }).map { it.summary }
     }
 
-    override suspend fun getAttendanceChartData(filter: ReportFilter): Result<ChartData> {
+    override suspend fun getAttendanceChartData(filter: ReportFilter): OzyuceResult<ChartData> {
         val stops = sampleStopsRepository.currentStops()
         val totalPersonnel = stops.sumOf { it.personnelCount }
         val attended = stops.sumOf { it.checkedPersonnelCount }
@@ -509,10 +509,10 @@ class SampleReportsRepositoryImpl @Inject constructor(
                 ChartEntry("Katilmadi", absent.toFloat(), 0xFFF44336, "Servise katilmayan")
             )
         )
-        return Result.Success(chart)
+        return OzyuceResult.Success(chart)
     }
 
-    override suspend fun getPerformanceChartData(filter: ReportFilter): Result<ChartData> {
+    override suspend fun getPerformanceChartData(filter: ReportFilter): OzyuceResult<ChartData> {
         val chart = ChartData(
             type = ChartType.BAR_CHART,
             title = "Performans Göstergeleri",
@@ -523,10 +523,10 @@ class SampleReportsRepositoryImpl @Inject constructor(
                 ChartEntry("Tamamlama", 96f)
             )
         )
-        return Result.Success(chart)
+        return OzyuceResult.Success(chart)
     }
 
-    override suspend fun getTimeAnalysisChartData(filter: ReportFilter): Result<ChartData> {
+    override suspend fun getTimeAnalysisChartData(filter: ReportFilter): OzyuceResult<ChartData> {
         val labels = listOf("08:00", "08:30", "09:00", "09:30", "10:00")
         val chart = ChartData(
             type = ChartType.LINE_CHART,
@@ -535,12 +535,16 @@ class SampleReportsRepositoryImpl @Inject constructor(
                 ChartEntry(label, (35 + index * 3).toFloat())
             }
         )
-        return Result.Success(chart)
+        return OzyuceResult.Success(chart)
     }
 
-    override suspend fun exportReportToPdf(report: DailyReport): Result<String> {
+    override suspend fun exportReportToPdf(report: DailyReport): OzyuceResult<String> {
         delay(80)
-        return Result.Success("/storage/emulated/0/Download/report_${report.date}.pdf")
+        return OzyuceResult.Success("/storage/emulated/0/Download/report_${report.date}.pdf")
+    }
+
+    override suspend fun getLateCount(filter: ReportFilter): OzyuceResult<Int> {
+        return OzyuceResult.Success(5) // Ornek bir deger
     }
 
     private fun createSummary(totalPersonnel: Int, attended: Int): ReportSummary {
@@ -555,10 +559,10 @@ class SampleReportsRepositoryImpl @Inject constructor(
         )
     }
 
-    private inline fun <T, R> Result<T>.map(transform: (T) -> R): Result<R> = when (this) {
-        is Result.Success -> Result.Success(transform(data))
-        is Result.Error -> Result.Error(exception)
-        Result.Loading -> Result.Loading
+    private inline fun <T, R> OzyuceResult<T>.map(transform: (T) -> R): OzyuceResult<R> = when (this) {
+        is OzyuceResult.Success -> OzyuceResult.Success(transform(data))
+        is OzyuceResult.Error -> OzyuceResult.Error(exception)
+        OzyuceResult.Loading -> OzyuceResult.Loading
     }
 }
 
@@ -580,12 +584,3 @@ private fun samplePolylineDistance(points: List<LatLng>): Double {
 }
 
 private fun LocalDateTime.toDate(): Date = Date.from(this.atZone(ZoneId.systemDefault()).toInstant())
-
-
-
-
-
-
-
-
-

@@ -1,6 +1,6 @@
 package com.ozyuce.maps.feature.reports.data.repository
 
-import com.ozyuce.maps.core.common.result.Result
+import com.ozyuce.maps.core.common.result.OzyuceResult
 import com.ozyuce.maps.feature.reports.domain.ReportsRepository
 import com.ozyuce.maps.feature.reports.domain.model.DailyReport
 import com.ozyuce.maps.feature.reports.domain.model.WeeklyReport
@@ -25,40 +25,40 @@ import kotlin.random.Random
 @Singleton
 class ReportsRepositoryImpl @Inject constructor() : ReportsRepository {
 
-    override suspend fun getDailyReport(date: String, routeId: String): Result<DailyReport> {
+    override suspend fun getDailyReport(date: String, routeId: String): OzyuceResult<DailyReport> {
         return try {
             kotlinx.coroutines.delay(800) // Network simulation
             
             val mockReport = generateMockDailyReport(date, routeId)
-            Result.Success(mockReport)
+            OzyuceResult.Success(mockReport)
         } catch (e: Exception) {
-            Result.Error(e)
+            OzyuceResult.Error(e)
         }
     }
 
-    override suspend fun getWeeklyReport(weekStartDate: String, routeId: String): Result<WeeklyReport> {
+    override suspend fun getWeeklyReport(weekStartDate: String, routeId: String): OzyuceResult<WeeklyReport> {
         return try {
             kotlinx.coroutines.delay(1200) // Network simulation
             
             val mockReport = generateMockWeeklyReport(weekStartDate, routeId)
-            Result.Success(mockReport)
+            OzyuceResult.Success(mockReport)
         } catch (e: Exception) {
-            Result.Error(e)
+            OzyuceResult.Error(e)
         }
     }
 
-    override suspend fun getReportSummary(filter: ReportFilter): Result<ReportSummary> {
+    override suspend fun getReportSummary(filter: ReportFilter): OzyuceResult<ReportSummary> {
         return try {
             kotlinx.coroutines.delay(600) // Network simulation
             
             val mockSummary = generateMockReportSummary()
-            Result.Success(mockSummary)
+            OzyuceResult.Success(mockSummary)
         } catch (e: Exception) {
-            Result.Error(e)
+            OzyuceResult.Error(e)
         }
     }
 
-    override suspend fun getAttendanceChartData(filter: ReportFilter): Result<ChartData> {
+    override suspend fun getAttendanceChartData(filter: ReportFilter): OzyuceResult<ChartData> {
         return try {
             kotlinx.coroutines.delay(400) // Network simulation
             
@@ -72,13 +72,13 @@ class ReportsRepositoryImpl @Inject constructor() : ReportsRepository {
                 )
             )
             
-            Result.Success(attendanceChart)
+            OzyuceResult.Success(attendanceChart)
         } catch (e: Exception) {
-            Result.Error(e)
+            OzyuceResult.Error(e)
         }
     }
 
-    override suspend fun getPerformanceChartData(filter: ReportFilter): Result<ChartData> {
+    override suspend fun getPerformanceChartData(filter: ReportFilter): OzyuceResult<ChartData> {
         return try {
             kotlinx.coroutines.delay(500) // Network simulation
             
@@ -93,13 +93,13 @@ class ReportsRepositoryImpl @Inject constructor() : ReportsRepository {
                 )
             )
             
-            Result.Success(performanceChart)
+            OzyuceResult.Success(performanceChart)
         } catch (e: Exception) {
-            Result.Error(e)
+            OzyuceResult.Error(e)
         }
     }
 
-    override suspend fun getTimeAnalysisChartData(filter: ReportFilter): Result<ChartData> {
+    override suspend fun getTimeAnalysisChartData(filter: ReportFilter): OzyuceResult<ChartData> {
         return try {
             kotlinx.coroutines.delay(450) // Network simulation
 
@@ -117,30 +117,30 @@ class ReportsRepositoryImpl @Inject constructor() : ReportsRepository {
                 )
             )
 
-            Result.Success(timeChart)
+            OzyuceResult.Success(timeChart)
         } catch (e: Exception) {
-            Result.Error(e)
+            OzyuceResult.Error(e)
         }
     }
 
-    override suspend fun getLateCount(filter: ReportFilter): Result<Int> {
+    override suspend fun getLateCount(filter: ReportFilter): OzyuceResult<Int> {
         return try {
             kotlinx.coroutines.delay(200)
-            Result.Success(Random.nextInt(0, 50))
+            OzyuceResult.Success(Random.nextInt(0, 50))
         } catch (e: Exception) {
-            Result.Error(e)
+            OzyuceResult.Error(e)
         }
     }
 
-    override suspend fun exportReportToPdf(report: DailyReport): Result<String> {
+    override suspend fun exportReportToPdf(report: DailyReport): OzyuceResult<String> {
         return try {
             kotlinx.coroutines.delay(2000) // File generation simulation
             
             // Mock file path
             val filePath = "/storage/emulated/0/Download/report_${report.date}.pdf"
-            Result.Success(filePath)
+            OzyuceResult.Success(filePath)
         } catch (e: Exception) {
-            Result.Error(e)
+            OzyuceResult.Error(e)
         }
     }
 

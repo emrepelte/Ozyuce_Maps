@@ -6,7 +6,7 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import com.google.android.gms.maps.model.LatLng
 import com.ozyuce.maps.core.common.Constants
 import com.ozyuce.maps.core.common.DispatcherProvider
-import com.ozyuce.maps.core.common.result.Result
+import com.ozyuce.maps.core.common.result.OzyuceResult
 import com.ozyuce.maps.core.location.LocationManager
 import com.ozyuce.maps.core.network.websocket.LocationWebSocketClient
 import com.ozyuce.maps.feature.map.domain.MapRepository
@@ -51,7 +51,7 @@ class MapRepositoryImpl @Inject constructor(
         location: LatLng,
         heading: Float,
         speed: Float
-    ): Result<VehicleLocation> {
+    ): OzyuceResult<VehicleLocation> {
         return try {
             val preferences = dataStore.data.first()
             val userId = preferences[userIdKey] ?: throw IllegalStateException("User ID not found")
@@ -67,10 +67,10 @@ class MapRepositoryImpl @Inject constructor(
                 timestamp = Date()
             )
             _vehicleLocation.value = vehicleLocation
-            Result.Success(vehicleLocation)
+            OzyuceResult.Success(vehicleLocation)
         } catch (e: Exception) {
             Timber.e(e, "Ara? konumu g?ncellenemedi")
-            Result.Error(e)
+            OzyuceResult.Error(e)
         }
     }
 
@@ -89,13 +89,13 @@ class MapRepositoryImpl @Inject constructor(
                 }
                 .collectLatest { update ->
                     when (val result = updateVehicleLocation(update.location, update.heading, update.speed)) {
-                        is Result.Success -> runCatching {
+                        is OzyuceResult.Success -> runCatching {
                             webSocketClient.sendLocation(result.data)
                         }.onFailure { error ->
                             Timber.e(error, "Konum WebSocket'e iletilemedi")
                         }
-                        is Result.Error -> Timber.e(result.exception, "Ara? konumu StateFlow'a yaz?lamad?")
-                        Result.Loading -> Unit
+                        is OzyuceResult.Error -> Timber.e(result.exception, "Ara? konumu StateFlow'a yaz?lamad?")
+                        OzyuceResult.Loading -> Unit
                     }
                 }
         }
@@ -107,8 +107,8 @@ class MapRepositoryImpl @Inject constructor(
         locationManager.stopLocationUpdates()
     }
 
-    override suspend fun getRoutePolyline(routeId: String): Result<RoutePolyline> {
-        return Result.Success(
+    override suspend fun getRoutePolyline(routeId: String): OzyuceResult<RoutePolyline> {
+        return OzyuceResult.Success(
             RoutePolyline(
                 routeId = routeId,
                 points = listOf(
@@ -122,7 +122,7 @@ class MapRepositoryImpl @Inject constructor(
         )
     }
 
-    override suspend fun getStopMarkers(routeId: String): Result<List<StopMarker>> {
+    override suspend fun getStopMarkers(routeId: String): OzyuceResult<List<StopMarker>> {
         val mockStops = listOf(
             StopMarker(
                 id = "stop_001",
@@ -153,13 +153,13 @@ class MapRepositoryImpl @Inject constructor(
             )
         )
         _stopMarkers.value = mockStops
-        return Result.Success(mockStops)
+        return OzyuceResult.Success(mockStops)
     }
 
     override fun getStopMarkersFlow(routeId: String): Flow<List<StopMarker>> = _stopMarkers
 
-    override suspend fun calculateEta(origin: LatLng, destination: LatLng): Result<RouteEta> {
-        return Result.Success(
+    override suspend fun calculateEta(origin: LatLng, destination: LatLng): OzyuceResult<RouteEta> {
+        return OzyuceResult.Success(
             RouteEta(
                 stopId = "mock_stop",
                 estimatedArrival = Date(System.currentTimeMillis() + 30 * 60 * 1000),
@@ -173,8 +173,8 @@ class MapRepositoryImpl @Inject constructor(
     override suspend fun calculateBatchEta(
         origin: LatLng,
         destinations: List<LatLng>
-    ): Result<List<RouteEta>> {
-        return Result.Success(
+    ): OzyuceResult<List<RouteEta>> {
+        return OzyuceResult.Success(
             destinations.mapIndexed { index, _ ->
                 RouteEta(
                     stopId = "mock_stop_$index",

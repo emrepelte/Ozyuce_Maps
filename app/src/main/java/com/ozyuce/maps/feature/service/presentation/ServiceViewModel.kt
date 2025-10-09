@@ -2,7 +2,7 @@ package com.ozyuce.maps.feature.service.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.ozyuce.maps.core.common.result.Result
+import com.ozyuce.maps.core.common.result.OzyuceResult
 import com.ozyuce.maps.feature.service.domain.EndServiceUseCase
 import com.ozyuce.maps.feature.service.domain.ServiceRepository
 import com.ozyuce.maps.feature.service.domain.StartServiceUseCase
@@ -65,19 +65,19 @@ class ServiceViewModel @Inject constructor(
             _uiState.value = _uiState.value.copy(isLoading = true)
             
             when (val result = serviceRepository.getAvailableRoutes()) {
-                is Result.Success -> {
+                is OzyuceResult.Success -> {
                     _uiState.value = _uiState.value.copy(
                         isLoading = false,
                         availableRoutes = result.data
                     )
                 }
-                is Result.Error -> {
+                is OzyuceResult.Error -> {
                     _uiState.value = _uiState.value.copy(
                         isLoading = false,
                         error = "Rotalar y?klenemedi: ${result.exception.message}"
                     )
                 }
-                is Result.Loading -> {
+                is OzyuceResult.Loading -> {
                     _uiState.value = _uiState.value.copy(isLoading = true)
                 }
             }
@@ -87,7 +87,7 @@ class ServiceViewModel @Inject constructor(
     private fun loadCurrentSession() {
         viewModelScope.launch {
             when (val result = serviceRepository.getCurrentSession()) {
-                is Result.Success -> {
+                is OzyuceResult.Success -> {
                     val session = result.data
                     _uiState.value = _uiState.value.copy(
                         currentSession = session,
@@ -97,11 +97,11 @@ class ServiceViewModel @Inject constructor(
                         }
                     )
                 }
-                is Result.Error -> {
+                is OzyuceResult.Error -> {
                     // Sessiona ula??lamad?, IDLE durumda kal
                     _uiState.value = _uiState.value.copy(serviceStatus = ServiceStatus.IDLE)
                 }
-                is Result.Loading -> {
+                is OzyuceResult.Loading -> {
                     _uiState.value = _uiState.value.copy(isLoading = true)
                 }
             }
@@ -113,7 +113,7 @@ class ServiceViewModel @Inject constructor(
             _uiState.value = _uiState.value.copy(isLoading = true, error = null)
 
             when (val result = startServiceUseCase(routeId)) {
-                is Result.Success -> {
+                is OzyuceResult.Success -> {
                     _uiState.value = _uiState.value.copy(
                         isLoading = false,
                         currentSession = result.data,
@@ -121,14 +121,14 @@ class ServiceViewModel @Inject constructor(
                     )
                     _uiEvent.emit(UiEvent.ShowSnackbar("Servis ba?ar?yla ba?lat?ld?!"))
                 }
-                is Result.Error -> {
+                is OzyuceResult.Error -> {
                     _uiState.value = _uiState.value.copy(
                         isLoading = false,
                         error = result.exception.message ?: "Servis ba?lat?lamad?"
                     )
                     _uiEvent.emit(UiEvent.ShowSnackbar(_uiState.value.error ?: "Servis ba?lat?lamad?", isError = true))
                 }
-                is Result.Loading -> {
+                is OzyuceResult.Loading -> {
                     _uiState.value = _uiState.value.copy(isLoading = true)
                 }
             }
@@ -140,7 +140,7 @@ class ServiceViewModel @Inject constructor(
             _uiState.value = _uiState.value.copy(isLoading = true, error = null)
 
             when (val result = endServiceUseCase()) {
-                is Result.Success -> {
+                is OzyuceResult.Success -> {
                     _uiState.value = _uiState.value.copy(
                         isLoading = false,
                         currentSession = result.data,
@@ -155,14 +155,14 @@ class ServiceViewModel @Inject constructor(
                         currentSession = null
                     )
                 }
-                is Result.Error -> {
+                is OzyuceResult.Error -> {
                     _uiState.value = _uiState.value.copy(
                         isLoading = false,
                         error = result.exception.message ?: "Servis bitirilemedi"
                     )
                     _uiEvent.emit(UiEvent.ShowSnackbar(_uiState.value.error ?: "Servis bitirilemedi", isError = true))
                 }
-                is Result.Loading -> {
+                is OzyuceResult.Loading -> {
                     _uiState.value = _uiState.value.copy(isLoading = true)
                 }
             }

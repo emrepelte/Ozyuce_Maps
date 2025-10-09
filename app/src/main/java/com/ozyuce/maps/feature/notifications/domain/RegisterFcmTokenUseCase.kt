@@ -1,6 +1,6 @@
 package com.ozyuce.maps.feature.notifications.domain
 
-import com.ozyuce.maps.core.common.result.Result
+import com.ozyuce.maps.core.common.result.OzyuceResult
 import javax.inject.Inject
 
 /**
@@ -9,9 +9,9 @@ import javax.inject.Inject
 class RegisterFcmTokenUseCase @Inject constructor(
     private val notificationsRepository: NotificationsRepository
 ) {
-    suspend operator fun invoke(token: String): Result<Unit> {
+    suspend operator fun invoke(token: String): OzyuceResult<Unit> {
         if (token.isBlank()) {
-            return Result.Error(IllegalArgumentException("FCM token bo? olamaz"))
+            return OzyuceResult.Error(IllegalArgumentException("FCM token bo? olamaz"))
         }
         
         return notificationsRepository.registerFcmToken(token)

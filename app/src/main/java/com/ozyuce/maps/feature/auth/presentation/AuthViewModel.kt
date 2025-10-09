@@ -2,7 +2,7 @@ package com.ozyuce.maps.feature.auth.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.ozyuce.maps.core.common.result.Result
+import com.ozyuce.maps.core.common.result.OzyuceResult
 import com.ozyuce.maps.feature.auth.domain.LoginUseCase
 import com.ozyuce.maps.feature.auth.domain.RegisterUseCase
 import com.ozyuce.maps.feature.auth.domain.AuthResult
@@ -37,19 +37,19 @@ class AuthViewModel @Inject constructor(
             _uiState.value = _uiState.value.copy(isLoading = true, error = null)
             
             when (val result = loginUseCase(email, password)) {
-                is Result.Success -> {
+                is OzyuceResult.Success -> {
                     _uiState.value = _uiState.value.copy(isLoading = false)
                     _uiEvent.emit(UiEvent.Navigate("dashboard"))
                     _uiEvent.emit(UiEvent.ShowSnackbar("Giri? ba?ar?l?! Ho? geldiniz ${result.data.user.name}"))
                 }
-                is Result.Error -> {
+                is OzyuceResult.Error -> {
                     _uiState.value = _uiState.value.copy(
                         isLoading = false, 
                         error = result.exception.message ?: "Giri? ba?ar?s?z"
                     )
                     _uiEvent.emit(UiEvent.ShowSnackbar(_uiState.value.error ?: "Giri? ba?ar?s?z", isError = true))
                 }
-                is Result.Loading -> {
+                is OzyuceResult.Loading -> {
                     _uiState.value = _uiState.value.copy(isLoading = true)
                 }
             }
@@ -61,19 +61,19 @@ class AuthViewModel @Inject constructor(
             _uiState.value = _uiState.value.copy(isLoading = true, error = null)
             
             when (val result = registerUseCase(email, password, name, role)) {
-                is Result.Success -> {
+                is OzyuceResult.Success -> {
                     _uiState.value = _uiState.value.copy(isLoading = false)
                     _uiEvent.emit(UiEvent.Navigate("dashboard"))
                     _uiEvent.emit(UiEvent.ShowSnackbar("Kay?t ba?ar?l?! Ho? geldiniz ${result.data.user.name}"))
                 }
-                is Result.Error -> {
+                is OzyuceResult.Error -> {
                     _uiState.value = _uiState.value.copy(
                         isLoading = false, 
                         error = result.exception.message ?: "Kay?t ba?ar?s?z"
                     )
                     _uiEvent.emit(UiEvent.ShowSnackbar(_uiState.value.error ?: "Kay?t ba?ar?s?z", isError = true))
                 }
-                is Result.Loading -> {
+                is OzyuceResult.Loading -> {
                     _uiState.value = _uiState.value.copy(isLoading = true)
                 }
             }

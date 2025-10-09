@@ -1,7 +1,7 @@
 package com.ozyuce.maps.feature.map.domain
 
 import com.ozyuce.maps.core.common.DispatcherProvider
-import com.ozyuce.maps.core.common.result.Result
+import com.ozyuce.maps.core.common.result.OzyuceResult
 import com.ozyuce.maps.feature.map.domain.model.RoutePolyline
 import com.ozyuce.maps.feature.map.domain.model.StopMarker
 import kotlinx.coroutines.flow.Flow
@@ -16,27 +16,26 @@ class GetRouteDetailsUseCase @Inject constructor(
     private val mapRepository: MapRepository,
     private val dispatcherProvider: DispatcherProvider
 ) {
-    suspend operator fun invoke(routeId: String): Result<Pair<RoutePolyline, List<StopMarker>>> {
-        return withContext(dispatcherProvider.io) {
+    suspend operator fun invoke(routeId: String): OzyuceResult<Pair<RoutePolyline, List<StopMarker>>> =
+        withContext(dispatcherProvider.io) {
             try {
-                // Rota ?izgisi
-                val polylineResult = mapRepository.getRoutePolyline(routeId)
-                if (polylineResult !is Result.Success) {
-                    return@withContext polylineResult as Result<Pair<RoutePolyline, List<StopMarker>>>
+                val polyline = when (val polylineResult = mapRepository.getRoutePolyline(routeId)) {
+                    is OzyuceResult.Success -> polylineResult.data
+                    is OzyuceResult.Error -> return@withContext OzyuceResult.Error(polylineResult.exception)
+                    OzyuceResult.Loading -> return@withContext OzyuceResult.Loading
                 }
 
-                // Durak marker'lar?
-                val markersResult = mapRepository.getStopMarkers(routeId)
-                if (markersResult !is Result.Success) {
-                    return@withContext markersResult as Result<Pair<RoutePolyline, List<StopMarker>>>
+                val markers = when (val markersResult = mapRepository.getStopMarkers(routeId)) {
+                    is OzyuceResult.Success -> markersResult.data
+                    is OzyuceResult.Error -> return@withContext OzyuceResult.Error(markersResult.exception)
+                    OzyuceResult.Loading -> return@withContext OzyuceResult.Loading
                 }
 
-                Result.Success(Pair(polylineResult.data, markersResult.data))
+                OzyuceResult.Success(polyline to markers)
             } catch (e: Exception) {
-                Result.Error(e)
+                OzyuceResult.Error(e)
             }
         }
-    }
 
     fun getStopMarkersFlow(routeId: String): Flow<List<StopMarker>> {
         return mapRepository.getStopMarkersFlow(routeId)

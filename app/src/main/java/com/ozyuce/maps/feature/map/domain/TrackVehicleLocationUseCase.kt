@@ -2,7 +2,7 @@ package com.ozyuce.maps.feature.map.domain
 
 import com.google.android.gms.maps.model.LatLng
 import com.ozyuce.maps.core.common.DispatcherProvider
-import com.ozyuce.maps.core.common.result.Result
+import com.ozyuce.maps.core.common.result.OzyuceResult
 import com.ozyuce.maps.feature.map.domain.model.VehicleLocation
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOn
@@ -30,15 +30,14 @@ class TrackVehicleLocationUseCase @Inject constructor(
         }
     }
 
-    suspend fun updateLocation(location: LatLng, heading: Float, speed: Float): Result<VehicleLocation> {
-        return withContext(dispatcherProvider.io) {
+    suspend fun updateLocation(location: LatLng, heading: Float, speed: Float): OzyuceResult<VehicleLocation> =
+        withContext(dispatcherProvider.io) {
             val result = mapRepository.updateVehicleLocation(location, heading, speed)
-            if (result is Result.Success) {
+            if (result is OzyuceResult.Success) {
                 mapRepository.sendLocationUpdate(result.data)
             }
             result
         }
-    }
 
     fun getLocationFlow(): Flow<VehicleLocation?> {
         return mapRepository.getVehicleLocationFlow()
