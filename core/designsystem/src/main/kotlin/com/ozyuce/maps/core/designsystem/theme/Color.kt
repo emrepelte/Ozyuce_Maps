@@ -3,8 +3,10 @@ package com.ozyuce.maps.core.designsystem.theme
 import androidx.compose.ui.graphics.Color
 
 object OzyuceColors {
-    // Brand Colors
-    val Primary = Color(0xFF0D1B2A)
+    // Brand Colors - Özyüce Lacivert + Kırmızı
+    val Primary = Color(0xFF223A8B) // Lacivert
+    val PrimarySoft = Color(0xFFE9EEFF) // Açık lacivert
+    val Accent = Color(0xFFE31B23) // Kırmızı aksan
     val Secondary = Color(0xFF1B263B)
     val Tertiary = Color(0xFFF59E0B)
     
@@ -15,7 +17,7 @@ object OzyuceColors {
 
     // Light Theme
     val LightSurface = Color(0xFFFAFAFA)
-    val LightBackground = Color(0xFFFFFFFF)
+    val LightBackground = Color(0xFFF6F7FB) // Mockup'taki bg rengi
     val LightOnPrimary = Color(0xFFFFFFFF)
     val LightOnSecondary = Color(0xFFFFFFFF)
     val LightOnTertiary = Color(0xFF000000)

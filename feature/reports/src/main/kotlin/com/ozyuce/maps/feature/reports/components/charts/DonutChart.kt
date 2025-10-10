@@ -1,5 +1,7 @@
 package com.ozyuce.maps.feature.reports.components.charts
 
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -13,20 +15,30 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.ozyuce.maps.feature.reports.ChartData
 
 @Composable
 fun DonutChart(
     data: List<ChartData>,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    centerLabel: String? = null
 ) {
+    val total = data.sumOf { it.value }
+    val animatedProgress by animateFloatAsState(
+        targetValue = if (total > 0) 1f else 0f,
+        animationSpec = tween(durationMillis = 900),
+        label = "donutProgress"
+    )
+
     Column(
         modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally
@@ -42,12 +54,11 @@ fun DonutChart(
                     .fillMaxWidth()
                     .padding(16.dp)
             ) {
-                val total = data.sumOf { it.value }
                 if (total <= 0) return@Canvas
 
                 var startAngle = 0f
                 data.forEach { item ->
-                    val sweepAngle = (item.value.toFloat() / total) * 360f
+                    val sweepAngle = (item.value.toFloat() / total) * 360f * animatedProgress
                     drawArc(
                         color = Color(item.color),
                         startAngle = startAngle,
@@ -61,10 +72,13 @@ fun DonutChart(
                 }
             }
 
-            Text(
-                text = data.sumOf { it.value }.toString(),
-                style = MaterialTheme.typography.headlineMedium
-            )
+            centerLabel?.let {
+                Text(
+                    text = it,
+                    style = MaterialTheme.typography.headlineMedium,
+                    fontWeight = FontWeight.Bold
+                )
+            }
         }
 
         Row(

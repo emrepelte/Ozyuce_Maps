@@ -1,7 +1,9 @@
 ﻿package com.ozyuce.maps.feature.dashboard
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -10,8 +12,8 @@ import androidx.compose.material.icons.rounded.DarkMode
 import androidx.compose.material.icons.rounded.LightMode
 import androidx.compose.material.icons.rounded.Palette
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -57,9 +59,13 @@ fun DashboardScreen(
         topBar = {
             OzyuceTopAppBar(
                 title = "Ana Sayfa",
+                showLogo = true,
                 onProfileClick = onProfileClick,
                 actions = {
-                    IconButton(onClick = onToggleDynamicColor) {
+                    FilledIconButton(
+                        onClick = onToggleDynamicColor,
+                        modifier = Modifier.padding(end = 4.dp)
+                    ) {
                         Icon(
                             imageVector = Icons.Rounded.Palette,
                             contentDescription = if (useDynamicColor) {
@@ -69,7 +75,7 @@ fun DashboardScreen(
                             }
                         )
                     }
-                    IconButton(onClick = onToggleThemeMode) {
+                    FilledIconButton(onClick = onToggleThemeMode) {
                         val icon = when (themeMode) {
                             ThemeMode.System, ThemeMode.Light -> Icons.Rounded.DarkMode
                             ThemeMode.Dark -> Icons.Rounded.LightMode
@@ -92,11 +98,12 @@ fun DashboardScreen(
                 .fillMaxSize()
                 .padding(padding)
                 .verticalScroll(rememberScrollState())
+                .padding(horizontal = 16.dp)
         ) {
             AnimatedWarningBanner(
                 message = uiState.warningMessage,
                 onDismiss = { viewModel.onEvent(DashboardEvent.DismissWarning) },
-                modifier = Modifier.padding(16.dp)
+                modifier = Modifier.padding(vertical = 8.dp)
             )
 
             ServiceCard(
@@ -105,22 +112,26 @@ fun DashboardScreen(
                 plateNumber = uiState.plateNumber,
                 routeName = uiState.routeName,
                 onToggleService = { viewModel.onEvent(DashboardEvent.ToggleService) },
-                modifier = Modifier.padding(16.dp)
+                modifier = Modifier.padding(top = 12.dp)
             )
+            
+            Spacer(modifier = Modifier.height(20.dp))
 
             MiniMap(
-                onMapClick = { onNavigate("map") },
-                modifier = Modifier.padding(horizontal = 16.dp)
+                onMapClick = { onNavigate("map") }
             )
+            
+            Spacer(modifier = Modifier.height(24.dp))
 
             QuickActions(
                 onScanStop = { viewModel.onEvent(DashboardEvent.NavigateToStops) },
                 onPassengerList = { viewModel.onEvent(DashboardEvent.NavigateToPassengers) },
                 onReports = { viewModel.onEvent(DashboardEvent.NavigateToReports) },
                 onPortal = { viewModel.onEvent(DashboardEvent.OpenPortal) },
-                onArvento = { viewModel.onEvent(DashboardEvent.OpenArvento) },
-                modifier = Modifier.padding(16.dp)
+                onArvento = { viewModel.onEvent(DashboardEvent.OpenArvento) }
             )
+            
+            Spacer(modifier = Modifier.height(24.dp))
         }
     }
 }

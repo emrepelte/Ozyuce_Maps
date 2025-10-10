@@ -9,6 +9,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CalendarMonth
@@ -35,13 +36,22 @@ import java.time.temporal.ChronoUnit
 import java.time.temporal.TemporalAdjusters
 import java.util.*
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun DateFilter(
     selectedType: FilterType,
     selectedRange: DateRange,
     onFilterTypeChanged: (FilterType) -> Unit,
     onDateRangeChanged: (DateRange) -> Unit,
+    plates: List<String>,
+    drivers: List<String>,
+    vehicleTypes: List<String>,
+    selectedPlate: String?,
+    onPlate: (String?) -> Unit,
+    selectedDriver: String?,
+    onDriver: (String?) -> Unit,
+    selectedVehicle: String?,
+    onVehicle: (String?) -> Unit,
     modifier: Modifier = Modifier
 ) {
     var showDatePicker by remember { mutableStateOf(false) }
@@ -107,8 +117,13 @@ fun DateFilter(
                                     val endOfMonth = today.withDayOfMonth(today.lengthOfMonth())
                                     DateRange(startOfMonth, endOfMonth)
                                 }
+                                FilterType.CUSTOM -> null
                             }
-                            onDateRangeChanged(newRange)
+                            if (type == FilterType.CUSTOM) {
+                                showDatePicker = true
+                            } else {
+                                newRange?.let(onDateRangeChanged)
+                            }
                         },
                         label = {
                             Text(
@@ -116,6 +131,7 @@ fun DateFilter(
                                     FilterType.DAY -> "Gün"
                                     FilterType.WEEK -> "Hafta"
                                     FilterType.MONTH -> "Ay"
+                                    FilterType.CUSTOM -> "Özel"
                                 }
                             )
                         },
@@ -222,6 +238,36 @@ fun DateFilter(
                 }
             }
         }
+
+        FlowRow(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 16.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            ExposedDropdown(
+                label = "Servis (Plaka)",
+                options = plates,
+                selected = selectedPlate,
+                onSelected = onPlate,
+                modifier = Modifier.fillMaxWidth(0.5f)
+            )
+            ExposedDropdown(
+                label = "Şoför (Ad Soyad)",
+                options = drivers,
+                selected = selectedDriver,
+                onSelected = onDriver,
+                modifier = Modifier.fillMaxWidth(0.5f)
+            )
+            ExposedDropdown(
+                label = "Araç (Marka/Model)",
+                options = vehicleTypes,
+                selected = selectedVehicle,
+                onSelected = onVehicle,
+                modifier = Modifier.fillMaxWidth(0.5f)
+            )
+        }
     }
     
     // Tarih seçici dialog
@@ -254,6 +300,48 @@ private fun QuickDateRangeButton(
         shape = RoundedCornerShape(8.dp)
     ) {
         Text(text = text, style = MaterialTheme.typography.labelMedium)
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun ExposedDropdown(
+    label: String,
+    options: List<String>,
+    selected: String?,
+    onSelected: (String?) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    var expanded by remember { mutableStateOf(false) }
+    ExposedDropdownMenuBox(expanded = expanded, onExpandedChange = { expanded = it }) {
+        OutlinedTextField(
+            value = selected ?: "",
+            onValueChange = {},
+            readOnly = true,
+            label = { Text(label) },
+            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded) },
+            modifier = modifier.menuAnchor()
+        )
+        ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+            DropdownMenuItem(
+                text = { Text("(Tümü)") },
+                onClick = {
+                    onSelected(null)
+                    expanded = false
+                },
+                contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding
+            )
+            options.forEach { opt ->
+                DropdownMenuItem(
+                    text = { Text(opt) },
+                    onClick = {
+                        onSelected(opt)
+                        expanded = false
+                    },
+                    contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding
+                )
+            }
+        }
     }
 }
 

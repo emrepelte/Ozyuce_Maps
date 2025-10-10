@@ -4,6 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ozyuce.maps.core.ui.events.UiEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -21,6 +23,9 @@ class DashboardViewModel @Inject constructor() : ViewModel() {
 
     private val _uiEvent = MutableSharedFlow<UiEvent>()
     val uiEvent: SharedFlow<UiEvent> = _uiEvent.asSharedFlow()
+    
+    private var timerJob: Job? = null
+    private var elapsedSeconds = 0L
 
     fun onEvent(event: DashboardEvent) {
         when (event) {
@@ -35,9 +40,46 @@ class DashboardViewModel @Inject constructor() : ViewModel() {
     }
 
     private fun toggleService() {
+        val newActiveState = !_uiState.value.isServiceActive
         _uiState.value = _uiState.value.copy(
-            isServiceActive = !_uiState.value.isServiceActive
+            isServiceActive = newActiveState
         )
+        
+        if (newActiveState) {
+            startTimer()
+        } else {
+            stopTimer()
+        }
+    }
+    
+    private fun startTimer() {
+        timerJob?.cancel()
+        elapsedSeconds = 0L
+        timerJob = viewModelScope.launch {
+            while (true) {
+                delay(1000L)
+                elapsedSeconds++
+                _uiState.value = _uiState.value.copy(
+                    serviceDuration = formatTime(elapsedSeconds)
+                )
+            }
+        }
+    }
+    
+    private fun stopTimer() {
+        timerJob?.cancel()
+        timerJob = null
+        elapsedSeconds = 0L
+        _uiState.value = _uiState.value.copy(
+            serviceDuration = "00:00:00"
+        )
+    }
+    
+    private fun formatTime(totalSeconds: Long): String {
+        val hours = (totalSeconds / 3600).toString().padStart(2, '0')
+        val minutes = ((totalSeconds % 3600) / 60).toString().padStart(2, '0')
+        val seconds = (totalSeconds % 60).toString().padStart(2, '0')
+        return "$hours:$minutes:$seconds"
     }
 
     private fun dismissWarning() {

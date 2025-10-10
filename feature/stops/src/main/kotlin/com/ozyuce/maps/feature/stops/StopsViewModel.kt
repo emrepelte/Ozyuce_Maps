@@ -46,6 +46,7 @@ class StopsViewModel @Inject constructor() : ViewModel() {
             is StopsEvent.TogglePersonStatus -> togglePersonStatus(event.personId)
             is StopsEvent.UndoStatusChange -> undoStatusChange()
             is StopsEvent.NavigateToAddPerson -> navigateToAddPerson()
+            is StopsEvent.AddPerson -> addPerson(event.name, event.department)
         }
     }
 
@@ -105,6 +106,30 @@ class StopsViewModel @Inject constructor() : ViewModel() {
         }
     }
 
+    private fun addPerson(name: String, department: String) {
+        if (name.isBlank()) {
+            viewModelScope.launch {
+                _uiEvent.emit(UiEvent.ShowSnackbar("Lütfen isim giriniz"))
+            }
+            return
+        }
+
+        val newPerson = PersonUiState(
+            id = System.currentTimeMillis().toString(),
+            name = name,
+            department = department.ifBlank { "Genel" },
+            status = PersonStatus.PENDING
+        )
+
+        val updatedList = _uiState.value.persons + newPerson
+        _uiState.value = _uiState.value.copy(persons = updatedList)
+        updateCounters()
+
+        viewModelScope.launch {
+            _uiEvent.emit(UiEvent.ShowSnackbar("$name başarıyla eklendi"))
+        }
+    }
+
     private fun updateCounters() {
         val persons = _uiState.value.persons
         _uiState.value = _uiState.value.copy(
@@ -156,4 +181,5 @@ sealed interface StopsEvent {
     data class TogglePersonStatus(val personId: String) : StopsEvent
     data object UndoStatusChange : StopsEvent
     data object NavigateToAddPerson : StopsEvent
+    data class AddPerson(val name: String, val department: String) : StopsEvent
 }

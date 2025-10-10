@@ -1,14 +1,25 @@
 ﻿package com.ozyuce.maps.feature.dashboard.components
 
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.*
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.ozyuce.maps.core.designsystem.theme.OzyuceColors
 
 @Composable
 fun QuickActions(
@@ -20,93 +31,136 @@ fun QuickActions(
     modifier: Modifier = Modifier
 ) {
     Column(modifier = modifier) {
+        // Hızlı Eylemler başlığı
         Text(
-            text = "H?zl? Eylemler",
-            style = MaterialTheme.typography.titleMedium,
-            modifier = Modifier.padding(bottom = 8.dp)
+            text = "Hızlı Eylemler",
+            style = MaterialTheme.typography.titleMedium.copy(
+                fontWeight = FontWeight.Bold,
+                letterSpacing = (-0.2).sp
+            ),
+            modifier = Modifier.padding(bottom = 12.dp)
         )
-        Row(
+        
+        // Hızlı Eylemler - Dikey Liste
+        Column(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            ActionButton(
+            QuickActionItem(
                 icon = Icons.Rounded.QrCodeScanner,
-                text = "Durak Tara",
-                onClick = onScanStop,
-                modifier = Modifier.weight(1f)
+                label = "Durak Tara",
+                onClick = onScanStop
             )
-            ActionButton(
+            QuickActionItem(
                 icon = Icons.Rounded.People,
-                text = "Yolcu Listesi",
-                onClick = onPassengerList,
-                modifier = Modifier.weight(1f)
+                label = "Yolcu Listesi",
+                onClick = onPassengerList
             )
-            ActionButton(
-                icon = Icons.Rounded.Assessment,
-                text = "Raporlar",
-                onClick = onReports,
-                modifier = Modifier.weight(1f)
+            QuickActionItem(
+                icon = Icons.Rounded.BarChart,
+                label = "Raporlar",
+                onClick = onReports
             )
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(24.dp))
 
+        // Kestirmeler başlığı
         Text(
             text = "Kestirmeler",
-            style = MaterialTheme.typography.titleMedium,
-            modifier = Modifier.padding(bottom = 8.dp)
+            style = MaterialTheme.typography.titleMedium.copy(
+                fontWeight = FontWeight.Bold,
+                letterSpacing = (-0.2).sp
+            ),
+            modifier = Modifier.padding(bottom = 12.dp)
         )
+        
+        // Kestirmeler - 2'li Grid
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            ActionButton(
+            QuickActionItem(
                 icon = Icons.Rounded.Web,
-                text = "Portal",
+                label = "Portal",
                 onClick = onPortal,
                 modifier = Modifier.weight(1f)
             )
-            ActionButton(
+            QuickActionItem(
                 icon = Icons.Rounded.LocationOn,
-                text = "Arvento",
+                label = "Arvento",
                 onClick = onArvento,
                 modifier = Modifier.weight(1f)
             )
-            Spacer(modifier = Modifier.weight(1f))
         }
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun ActionButton(
+private fun QuickActionItem(
     icon: ImageVector,
-    text: String,
+    label: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Card(
-        onClick = onClick,
-        modifier = modifier,
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant
-        )
+    var isPressed by remember { mutableStateOf(false) }
+    val scale by animateFloatAsState(
+        targetValue = if (isPressed) 0.98f else 1f,
+        animationSpec = tween(durationMillis = 100),
+        label = "action_scale"
+    )
+
+    Surface(
+        modifier = modifier
+            .scale(scale)
+            .shadow(
+                elevation = 2.dp,
+                shape = RoundedCornerShape(16.dp)
+            ),
+        shape = RoundedCornerShape(16.dp),
+        color = MaterialTheme.colorScheme.surface,
+        tonalElevation = 0.dp
     ) {
-        Column(
+        Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(8.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+                .clickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    onClick = {
+                        isPressed = true
+                        onClick()
+                        isPressed = false
+                    }
+                )
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Icon(
-                imageVector = icon,
-                contentDescription = text,
-                tint = MaterialTheme.colorScheme.primary
-            )
-            Spacer(modifier = Modifier.height(4.dp))
+            // İkon Container
+            Surface(
+                modifier = Modifier.size(44.dp),
+                shape = RoundedCornerShape(12.dp),
+                color = OzyuceColors.PrimarySoft
+            ) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = icon,
+                        contentDescription = label,
+                        modifier = Modifier.size(20.dp),
+                        tint = OzyuceColors.Primary
+                    )
+                }
+            }
+            
+            // Label
             Text(
-                text = text,
-                style = MaterialTheme.typography.labelSmall
+                text = label,
+                style = MaterialTheme.typography.bodyMedium.copy(
+                    fontWeight = FontWeight.SemiBold
+                )
             )
         }
     }
